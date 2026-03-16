@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from 'react';
@@ -10,12 +9,13 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2, LayoutDashboard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
+import Link from 'next/link';
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -74,22 +74,31 @@ export function CheckInForm() {
   if (isSubmitted) {
     return (
       <Card className="max-w-md mx-auto border-2 border-accent bg-accent/5">
-        <CardContent className="pt-10 pb-10 text-center space-y-4">
+        <CardContent className="pt-10 pb-10 text-center space-y-6">
           <div className="bg-accent/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle2 className="h-10 w-10 text-accent" />
           </div>
           <h2 className="text-3xl font-headline font-bold text-primary">Welcome to NEU Library!</h2>
           <p className="text-muted-foreground">Your check-in has been recorded successfully. Have a productive session!</p>
-          <Button 
-            variant="outline" 
-            className="mt-6"
-            onClick={() => {
-              setIsSubmitted(false);
-              form.reset();
-            }}
-          >
-            New Check-in
-          </Button>
+          
+          <div className="flex flex-col gap-3">
+            <Link href="/user">
+              <Button className="w-full gap-2 bg-accent hover:bg-accent/90">
+                <LayoutDashboard className="h-4 w-4" />
+                Go to User Dashboard
+              </Button>
+            </Link>
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={() => {
+                setIsSubmitted(false);
+                form.reset();
+              }}
+            >
+              New Check-in
+            </Button>
+          </div>
         </CardContent>
       </Card>
     );
@@ -98,7 +107,7 @@ export function CheckInForm() {
   return (
     <Card className="max-w-lg mx-auto shadow-xl">
       <CardHeader className="bg-primary text-primary-foreground rounded-t-lg">
-        <CardTitle className="font-headline text-2xl">Visitor Log</CardTitle>
+        <CardTitle className="font-headline text-2xl">User Entry Log</CardTitle>
         <CardDescription className="text-primary-foreground/70">Please fill out your details to enter the library.</CardDescription>
       </CardHeader>
       <CardContent className="pt-6">

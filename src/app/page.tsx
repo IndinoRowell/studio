@@ -1,4 +1,3 @@
-
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -40,7 +39,7 @@ export default function Home() {
                 data-ai-hint="university campus"
               />
               {/* Overlay for Contrast */}
-              <div className="absolute inset-0 bg-black/40 z-0" />
+              <div className="absolute inset-0 bg-black/50 z-0" />
             </>
           )}
           <div className="container mx-auto px-4 text-center z-10">
@@ -65,13 +64,13 @@ export default function Home() {
                 <div className="mx-auto bg-accent/10 p-6 rounded-full w-fit mb-4 group-hover:scale-110 transition-transform">
                   <User className="h-12 w-12 text-accent" />
                 </div>
-                <CardTitle className="font-headline text-3xl">Visitor Portal</CardTitle>
-                <CardDescription className="text-base">Check-in for your visit and explore resources</CardDescription>
+                <CardTitle className="font-headline text-3xl">User Portal</CardTitle>
+                <CardDescription className="text-base">Check-in for your session and view your dashboard</CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col items-center">
                 <Link href="/check-in" className="w-full">
                   <Button className="w-full h-12 text-lg bg-accent hover:bg-accent/90">
-                    Visitor Check-in
+                    User Check-in
                   </Button>
                 </Link>
               </CardContent>
