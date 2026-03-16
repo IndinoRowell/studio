@@ -36,6 +36,7 @@ export default function UserDashboardPage() {
   // We ensure the filter on visitorId is applied to match security rules
   const recentLogsQuery = useMemoFirebase(() => {
     if (!db || !user?.uid) return null;
+    // The query MUST have this where clause to be allowed by security rules for non-admins
     return query(
       collection(db, 'visitorLogs'),
       where('visitorId', '==', user.uid),
@@ -48,7 +49,7 @@ export default function UserDashboardPage() {
 
   const handleSignOut = async () => {
     await signOut(auth);
-    router.push('/');
+    router.replace('/');
   };
 
   if (isUserLoading || isAdminLoading) {

@@ -29,12 +29,18 @@ service cloud.firestore {
     }
 
     match /visitorLogs/{logId} {
-      // Allow listing if the user is filtering by their own visitorId OR if they are an admin.
-      // We use the 'resource.data' check which Firestore uses to validate queries.
-      allow list: if isSignedIn() && (isAdmin() || resource.data.visitorId == request.auth.uid);
+      // Explicitly allow list if the query is restricted to the user's own UID
+      // This helps the rules engine verify the safety of the request statically.
+      allow list: if isSignedIn() && (
+        (resource.data.visitorId == request.auth.uid) || 
+        isAdmin()
+      );
       
       // Allow getting a single document
-      allow get: if isSignedIn() && (isAdmin() || resource.data.visitorId == request.auth.uid);
+      allow get: if isSignedIn() && (
+        (resource.data.visitorId == request.auth.uid) || 
+        isAdmin()
+      );
       
       // Allow creation by the visitor themselves
       allow create: if isSignedIn() && request.resource.data.visitorId == request.auth.uid;
