@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo } from 'react';
@@ -15,7 +14,7 @@ import { collection, addDoc, query, orderBy, serverTimestamp } from 'firebase/fi
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { UserPlus, Search, Mail, School, Shield, Loader2 } from 'lucide-react';
+import { UserPlus, Search, Mail, School, Shield, Loader2, Key } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
@@ -25,6 +24,7 @@ const userSchema = z.object({
   email: z.string().email("Invalid university email"),
   college: z.string().min(1, "Please select a college"),
   role: z.enum(['Student', 'Faculty', 'Staff']),
+  password: z.string().min(6, "Initial password must be at least 6 characters"),
 });
 
 export function UserManagement() {
@@ -56,6 +56,7 @@ export function UserManagement() {
       email: "",
       college: "",
       role: "Student",
+      password: "",
     },
   });
 
@@ -73,7 +74,7 @@ export function UserManagement() {
         form.reset();
         toast({
           title: "User Added",
-          description: `${values.displayName} has been successfully registered.`,
+          description: `${values.displayName} has been successfully registered with the provided initial password.`,
         });
       })
       .catch(async (error) => {
@@ -111,7 +112,7 @@ export function UserManagement() {
             <DialogHeader>
               <DialogTitle className="font-headline text-2xl">Register Library User</DialogTitle>
               <DialogDescription>
-                Add a new student, faculty, or staff member to the library system.
+                Add a new member. The initial password will be saved to their profile.
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
@@ -138,6 +139,25 @@ export function UserManagement() {
                       <FormControl>
                         <Input placeholder="user@neu.edu.ph" {...field} />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Initial Password</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input type="password" placeholder="••••••••" className="pr-10" {...field} />
+                          <Key className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        </div>
+                      </FormControl>
+                      <FormDescription className="text-[10px]">
+                        The user will use this password to complete their registration.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
