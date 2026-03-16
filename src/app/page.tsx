@@ -28,7 +28,7 @@ export default function Home() {
 
       {/* Hero Section */}
       <main className="flex-grow">
-        <section className="relative h-[50vh] flex items-center justify-center overflow-hidden">
+        <section className="relative h-[60vh] flex items-center justify-center overflow-hidden">
           {heroImage && (
             <>
               <Image
@@ -40,54 +40,54 @@ export default function Home() {
                 data-ai-hint="university campus"
               />
               {/* Dark Overlay for Readability */}
-              <div className="absolute inset-0 bg-black/40 z-0" />
+              <div className="absolute inset-0 bg-black/50 z-0" />
             </>
           )}
           <div className="container mx-auto px-4 text-center z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium mb-4 animate-pulse">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100/90 text-green-800 text-xs font-medium mb-6 backdrop-blur-sm animate-pulse">
               <CheckCircle className="h-3 w-3" />
               System Online & Ready
             </div>
-            <h2 className="text-4xl md:text-6xl font-headline font-bold text-white mb-4">
+            <h2 className="text-5xl md:text-7xl font-headline font-bold text-white mb-6 drop-shadow-lg">
               New Era University
             </h2>
-            <p className="text-lg text-white/90 max-w-2xl mx-auto mb-8 font-body">
+            <p className="text-xl text-white/95 max-w-2xl mx-auto mb-10 font-body drop-shadow-md">
               Your gateway to academic excellence and scholarly resources. Please select your portal to proceed.
             </p>
           </div>
         </section>
 
         {/* Role Selection */}
-        <section className="container mx-auto px-4 py-12">
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <Card className="hover:shadow-lg transition-all border-2 hover:border-accent">
+        <section className="container mx-auto px-4 py-16">
+          <div className="grid md:grid-cols-2 gap-10 max-w-5xl mx-auto">
+            <Card className="hover:shadow-xl transition-all border-2 hover:border-accent group">
               <CardHeader className="text-center">
-                <div className="mx-auto bg-accent/10 p-4 rounded-full w-fit mb-4">
-                  <User className="h-10 w-10 text-accent" />
+                <div className="mx-auto bg-accent/10 p-6 rounded-full w-fit mb-4 group-hover:scale-110 transition-transform">
+                  <User className="h-12 w-12 text-accent" />
                 </div>
-                <CardTitle className="font-headline text-2xl">Visitor Portal</CardTitle>
-                <CardDescription>Check-in for your visit and explore resources</CardDescription>
+                <CardTitle className="font-headline text-3xl">Visitor Portal</CardTitle>
+                <CardDescription className="text-base">Check-in for your visit and explore resources</CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col items-center">
                 <Link href="/check-in" className="w-full">
-                  <Button className="w-full bg-accent hover:bg-accent/90">
+                  <Button className="w-full h-12 text-lg bg-accent hover:bg-accent/90">
                     Visitor Check-in
                   </Button>
                 </Link>
               </CardContent>
             </Card>
 
-            <Card className="hover:shadow-lg transition-all border-2 hover:border-primary">
+            <Card className="hover:shadow-xl transition-all border-2 hover:border-primary group">
               <CardHeader className="text-center">
-                <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit mb-4">
-                  <ShieldCheck className="h-10 w-10 text-primary" />
+                <div className="mx-auto bg-primary/10 p-6 rounded-full w-fit mb-4 group-hover:scale-110 transition-transform">
+                  <ShieldCheck className="h-12 w-12 text-primary" />
                 </div>
-                <CardTitle className="font-headline text-2xl">Admin Dashboard</CardTitle>
-                <CardDescription>Manage logs, view statistics, and gain insights</CardDescription>
+                <CardTitle className="font-headline text-3xl">Admin Dashboard</CardTitle>
+                <CardDescription className="text-base">Manage logs, view statistics, and gain insights</CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col items-center">
                 <Link href="/login" className="w-full">
-                  <Button className="w-full bg-primary hover:bg-primary/90">
+                  <Button className="w-full h-12 text-lg bg-primary hover:bg-primary/90">
                     Administrator Login
                   </Button>
                 </Link>
@@ -98,9 +98,9 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t py-8">
+      <footer className="bg-white border-t py-10">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© 2025 NEULib Connect. All rights reserved.</p>
+          <p>© 2025 NEULib Connect. Dedicated to Excellence.</p>
         </div>
       </footer>
     </div>
