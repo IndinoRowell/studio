@@ -1,0 +1,27 @@
+
+{
+  "entities": {
+    "VisitorLog": {
+      "title": "Visitor Log",
+      "description": "A record of a visitor's entry into the library.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "reason": { "type": "string" },
+        "college": { "type": "string" },
+        "employeeStatus": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "reason", "college", "employeeStatus", "timestamp"]
+    }
+  },
+  "auth": {
+    "providers": ["google.com", "password"]
+  },
+  "firestore": {
+    "/logs/{logId}": {
+      "schema": "#/entities/VisitorLog",
+      "description": "Collection of all visitor check-ins."
+    }
+  }
+}

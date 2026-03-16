@@ -1,9 +1,41 @@
+
+'use client';
+
 import { StatsDashboard } from "@/components/admin/stats-dashboard";
-import { Library, LogOut, Settings, LayoutDashboard } from "lucide-react";
+import { Library, LogOut, Settings, LayoutDashboard, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useUser, useAuth } from "@/firebase";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { signOut } from "firebase/auth";
 
 export default function AdminPage() {
+  const { user, loading } = useUser();
+  const auth = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
+
+  const handleSignOut = async () => {
+    await signOut(auth);
+    router.push('/');
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!user) return null;
+
   return (
     <div className="flex min-h-screen bg-background">
       {/* Sidebar */}
@@ -25,12 +57,14 @@ export default function AdminPage() {
         </nav>
 
         <div className="p-6 border-t border-white/10">
-          <Link href="/">
-            <Button variant="ghost" className="w-full justify-start gap-3 text-white/70 hover:text-white hover:bg-white/10">
-              <LogOut className="h-5 w-5" />
-              Sign Out
-            </Button>
-          </Link>
+          <Button 
+            variant="ghost" 
+            className="w-full justify-start gap-3 text-white/70 hover:text-white hover:bg-white/10"
+            onClick={handleSignOut}
+          >
+            <LogOut className="h-5 w-5" />
+            Sign Out
+          </Button>
         </div>
       </aside>
 
@@ -39,12 +73,12 @@ export default function AdminPage() {
         <header className="flex items-center justify-between mb-8">
           <div>
             <p className="text-muted-foreground text-sm">Library Administrator Portal</p>
-            <h2 className="text-2xl font-headline font-semibold">Welcome back, Admin</h2>
+            <h2 className="text-2xl font-headline font-semibold">Welcome back, {user.displayName || 'Admin'}</h2>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right hidden sm:block">
-              <p className="text-sm font-medium">Administrator</p>
-              <p className="text-xs text-muted-foreground">admin@neu.edu.ph</p>
+              <p className="text-sm font-medium">{user.displayName || 'Administrator'}</p>
+              <p className="text-xs text-muted-foreground">{user.email}</p>
             </div>
           </div>
         </header>
