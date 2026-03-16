@@ -28,26 +28,30 @@ export default function Home() {
 
       {/* Hero Section */}
       <main className="flex-grow">
-        <section className="relative h-[40vh] md:h-[50vh] flex items-center justify-center overflow-hidden">
+        <section className="relative h-[50vh] flex items-center justify-center overflow-hidden">
           {heroImage && (
-            <Image
-              src={heroImage.imageUrl}
-              alt={heroImage.description}
-              fill
-              className="object-cover opacity-30"
-              priority
-              data-ai-hint="university campus"
-            />
+            <>
+              <Image
+                src={heroImage.imageUrl}
+                alt={heroImage.description}
+                fill
+                className="object-cover"
+                priority
+                data-ai-hint="university campus"
+              />
+              {/* Dark Overlay for Readability */}
+              <div className="absolute inset-0 bg-black/40 z-0" />
+            </>
           )}
           <div className="container mx-auto px-4 text-center z-10">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium mb-4 animate-pulse">
               <CheckCircle className="h-3 w-3" />
               System Online & Ready
             </div>
-            <h2 className="text-4xl md:text-6xl font-headline font-bold text-primary mb-4">
+            <h2 className="text-4xl md:text-6xl font-headline font-bold text-white mb-4">
               New Era University
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8 font-body">
+            <p className="text-lg text-white/90 max-w-2xl mx-auto mb-8 font-body">
               Your gateway to academic excellence and scholarly resources. Please select your portal to proceed.
             </p>
           </div>
