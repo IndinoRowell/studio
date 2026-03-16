@@ -61,8 +61,8 @@ export default function AdminPage() {
         <div className="absolute inset-0 bg-white/80 backdrop-blur-[1px]" />
       </div>
 
-      {/* Sidebar - Semi-transparent */}
-      <aside className="w-64 bg-primary/40 backdrop-blur-xl text-primary-foreground flex flex-col hidden lg:flex sticky top-0 h-screen shadow-2xl z-20 border-r border-white/10">
+      {/* Sidebar - Reverted to solid primary */}
+      <aside className="w-64 bg-primary text-primary-foreground flex flex-col hidden lg:flex sticky top-0 h-screen shadow-2xl z-20">
         <div className="p-6 flex items-center gap-2 mb-8 border-b border-white/10">
           <Library className="h-8 w-8" />
           <h1 className="text-2xl font-headline font-bold tracking-tight">NEULib Admin</h1>

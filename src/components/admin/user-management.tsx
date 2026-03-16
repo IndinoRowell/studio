@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo } from 'react';
@@ -73,8 +74,8 @@ export function UserManagement() {
         setIsDialogOpen(false);
         form.reset();
         toast({
-          title: "User Successfully Registered",
-          description: `Welcome to NEU Library, ${values.displayName}! Your account is now active.`,
+          title: "Welcome to NEU Library!",
+          description: `${values.displayName} has been successfully registered.`,
         });
       })
       .catch(async (error) => {
