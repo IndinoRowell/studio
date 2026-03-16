@@ -1,11 +1,12 @@
+
 "use client"
 
 import { useMemo, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import { Library, ChevronLeft, Calendar as CalendarIcon, Clock, User as UserIcon, BookOpen, LogOut, Sparkles } from "lucide-react";
+import { Library, ChevronLeft, Calendar as CalendarIcon, Clock, User as UserIcon, BookOpen, LogOut, Sparkles, School } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { collection, query, orderBy, limit } from 'firebase/firestore';
+import { collection, query, orderBy, limit, where } from 'firebase/firestore';
 import { useFirestore, useCollection, useUser, useAuth } from '@/firebase';
 import { format } from 'date-fns';
 import { Badge } from "@/components/ui/badge";
@@ -24,15 +25,41 @@ export default function UserDashboardPage() {
     }
   }, [user, userLoading, router]);
 
+  // Fetch the user's profile from the users collection based on email
+  const profileQuery = useMemo(() => {
+    if (!db || !user?.email) return null;
+    return query(
+      collection(db, 'users'),
+      where('email', '==', user.email),
+      limit(1)
+    );
+  }, [db, user?.email]);
+
+  const { data: profiles, loading: profileLoading } = useCollection(profileQuery);
+  const profile = profiles?.[0];
+
   const recentLogsQuery = useMemo(() => {
+    if (!db || !user?.email) return null;
     return query(
       collection(db, 'logs'),
+      where('userId', '==', user.uid),
       orderBy('timestamp', 'desc'),
       limit(10)
     );
-  }, [db]);
+  }, [db, user?.uid]);
 
-  const { data: logs, loading: logsLoading } = useCollection(recentLogsQuery);
+  // Fallback query if userId isn't used yet (legacy name match)
+  const legacyLogsQuery = useMemo(() => {
+    if (!db || !user?.displayName) return null;
+    return query(
+      collection(db, 'logs'),
+      where('name', '==', user.displayName),
+      orderBy('timestamp', 'desc'),
+      limit(10)
+    );
+  }, [db, user?.displayName]);
+
+  const { data: logs, loading: logsLoading } = useCollection(recentLogsQuery || legacyLogsQuery);
 
   const handleSignOut = async () => {
     await signOut(auth);
@@ -80,7 +107,10 @@ export default function UserDashboardPage() {
           </div>
           <div>
             <h1 className="text-4xl font-headline font-bold text-primary">User Dashboard</h1>
-            <p className="text-muted-foreground">Hello, {user.displayName || user.email}. View your library activity here.</p>
+            <p className="text-muted-foreground">
+              Hello, {user.displayName || user.email}. 
+              {profile && ` You are recognized as a ${profile.role} from the College of ${profile.college}.`}
+            </p>
           </div>
         </header>
 
@@ -90,9 +120,9 @@ export default function UserDashboardPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Clock className="h-5 w-5 text-accent" />
-                  Recent Library Activity
+                  Your Recent Library Activity
                 </CardTitle>
-                <CardDescription>The latest entries recorded in the system.</CardDescription>
+                <CardDescription>Your latest entries recorded in the system.</CardDescription>
               </CardHeader>
               <CardContent>
                 {logsLoading ? (
@@ -128,7 +158,7 @@ export default function UserDashboardPage() {
                   </div>
                 ) : (
                   <div className="py-12 text-center text-muted-foreground border-2 border-dashed rounded-lg">
-                    <p>No recent activity found.</p>
+                    <p>No recent activity found. Visit the library and check-in!</p>
                   </div>
                 )}
               </CardContent>
@@ -152,6 +182,33 @@ export default function UserDashboardPage() {
                 </Link>
               </CardContent>
             </Card>
+
+            {profile && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <School className="h-5 w-5 text-accent" />
+                    Profile Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2 text-sm">
+                  <div className="flex justify-between border-b pb-2">
+                    <span className="text-muted-foreground">Affiliation</span>
+                    <span className="font-medium">{profile.college}</span>
+                  </div>
+                  <div className="flex justify-between border-b pb-2">
+                    <span className="text-muted-foreground">Role</span>
+                    <span className="font-medium">{profile.role}</span>
+                  </div>
+                  <div className="flex justify-between pt-1">
+                    <span className="text-muted-foreground">Member Since</span>
+                    <span className="font-medium">
+                      {profile.createdAt ? format(profile.createdAt.toDate(), 'MMM yyyy') : 'N/A'}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             <Card>
               <CardHeader>
