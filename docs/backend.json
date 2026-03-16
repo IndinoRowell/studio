@@ -3,16 +3,30 @@
   "entities": {
     "VisitorLog": {
       "title": "Visitor Log",
-      "description": "A record of a visitor's entry into the library.",
+      "description": "A record of a user's entry into the library.",
       "type": "object",
       "properties": {
         "name": { "type": "string" },
         "reason": { "type": "string" },
         "college": { "type": "string" },
         "employeeStatus": { "type": "string" },
-        "timestamp": { "type": "string", "format": "date-time" }
+        "timestamp": { "type": "string", "format": "date-time" },
+        "userId": { "type": "string" }
       },
       "required": ["name", "reason", "college", "employeeStatus", "timestamp"]
+    },
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Metadata for a library user.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "college": { "type": "string" },
+        "role": { "type": "string", "enum": ["Student", "Faculty", "Staff"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "displayName", "college", "role"]
     }
   },
   "auth": {
@@ -21,7 +35,11 @@
   "firestore": {
     "/logs/{logId}": {
       "schema": "#/entities/VisitorLog",
-      "description": "Collection of all visitor check-ins."
+      "description": "Collection of all library entry logs."
+    },
+    "/users/{userId}": {
+      "schema": "#/entities/UserProfile",
+      "description": "User profile data."
     }
   }
 }
