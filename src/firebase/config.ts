@@ -1,6 +1,6 @@
 
 export const firebaseConfig = {
-  apiKey: "AIzaSyC1-DUMMY-KEY-REPLACED-FOR-STUDIO",
+  apiKey: "AIzaSyAs-V0m-DUMMY-REPLACED-TO-ALLOW-INITIALIZATION",
   authDomain: "neulib-connect.firebaseapp.com",
   projectId: "neulib-connect",
   storageBucket: "neulib-connect.firebasestorage.app",
