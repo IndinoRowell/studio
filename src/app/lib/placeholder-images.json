@@ -1,0 +1,16 @@
+{
+  "placeholderImages": [
+    {
+      "id": "hero-library",
+      "description": "New Era University Main Campus",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/en/4/41/New_Era_University_main_campus.jpg",
+      "imageHint": "university campus"
+    },
+    {
+      "id": "admin-bg",
+      "description": "Data analytics and academic growth",
+      "imageUrl": "https://picsum.photos/seed/neulib-admin/800/400",
+      "imageHint": "data visualization"
+    }
+  ]
+}
