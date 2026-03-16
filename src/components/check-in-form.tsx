@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState } from 'react';
@@ -12,7 +13,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { CheckCircle2, Loader2, LayoutDashboard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { useFirestore } from '@/firebase';
+import { useFirestore, useUser } from '@/firebase';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import Link from 'next/link';
@@ -33,25 +34,36 @@ const formSchema = z.object({
 export function CheckInForm() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { user } = useUser();
   const { toast } = useToast();
   const db = useFirestore();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
+      name: user?.displayName || "",
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Required",
+        description: "Please sign in to record your check-in.",
+      });
+      return;
+    }
+
     setIsLoading(true);
     
     const logData = {
       ...values,
+      visitorId: user.uid,
       timestamp: serverTimestamp(),
     };
 
-    addDoc(collection(db, 'logs'), logData)
+    addDoc(collection(db, 'visitorLogs'), logData)
       .then(() => {
         setIsLoading(false);
         setIsSubmitted(true);
@@ -63,7 +75,7 @@ export function CheckInForm() {
       .catch(async (error) => {
         setIsLoading(false);
         const permissionError = new FirestorePermissionError({
-          path: '/logs',
+          path: 'visitorLogs',
           operation: 'create',
           requestResourceData: logData,
         });

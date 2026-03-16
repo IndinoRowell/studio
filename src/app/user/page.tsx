@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useEffect } from 'react';
@@ -5,8 +6,8 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/com
 import { Library, ChevronLeft, Calendar as CalendarIcon, Clock, User as UserIcon, BookOpen, LogOut, Sparkles, School } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { collection, query, orderBy, limit, where } from 'firebase/firestore';
-import { useFirestore, useCollection, useUser, useAuth } from '@/firebase';
+import { collection, query, orderBy, limit, where, doc } from 'firebase/firestore';
+import { useFirestore, useCollection, useUser, useAuth, useMemoFirebase, useDoc } from '@/firebase';
 import { format } from 'date-fns';
 import { Badge } from "@/components/ui/badge";
 import { useRouter } from 'next/navigation';
@@ -19,59 +20,44 @@ export default function UserDashboardPage(props: {
   const params = React.use(props.params);
   const searchParams = React.use(props.searchParams);
 
-  const { user, loading: userLoading } = useUser();
+  const { user, isUserLoading } = useUser();
   const db = useFirestore();
   const auth = useAuth();
   const router = useRouter();
   
   useEffect(() => {
-    if (!userLoading && !user) {
+    if (!isUserLoading && !user) {
       router.push('/user/login');
     }
-  }, [user, userLoading, router]);
+  }, [user, isUserLoading, router]);
 
-  // Fetch the user's profile from the users collection based on email
-  const profileQuery = useMemo(() => {
-    if (!db || !user?.email) return null;
+  // Fetch the user's profile from the users collection by UID
+  const profileRef = useMemoFirebase(() => {
+    if (!db || !user?.uid) return null;
+    return doc(db, 'users', user.uid);
+  }, [db, user?.uid]);
+
+  const { data: profile, isLoading: profileLoading } = useDoc(profileRef);
+
+  // Fetch recent check-ins for the user
+  const recentLogsQuery = useMemoFirebase(() => {
+    if (!db || !user?.uid) return null;
     return query(
-      collection(db, 'users'),
-      where('email', '==', user.email),
-      limit(1)
-    );
-  }, [db, user?.email]);
-
-  const { data: profiles, loading: profileLoading } = useCollection(profileQuery);
-  const profile = profiles?.[0];
-
-  const recentLogsQuery = useMemo(() => {
-    if (!db || !user?.email) return null;
-    return query(
-      collection(db, 'logs'),
-      where('userId', '==', user.uid),
+      collection(db, 'visitorLogs'),
+      where('visitorId', '==', user.uid),
       orderBy('timestamp', 'desc'),
       limit(10)
     );
   }, [db, user?.uid]);
 
-  // Fallback query if userId isn't used yet (legacy name match)
-  const legacyLogsQuery = useMemo(() => {
-    if (!db || !user?.displayName) return null;
-    return query(
-      collection(db, 'logs'),
-      where('name', '==', user.displayName),
-      orderBy('timestamp', 'desc'),
-      limit(10)
-    );
-  }, [db, user?.displayName]);
-
-  const { data: logs, loading: logsLoading } = useCollection(recentLogsQuery || legacyLogsQuery);
+  const { data: logs, isLoading: logsLoading } = useCollection(recentLogsQuery);
 
   const handleSignOut = async () => {
     await signOut(auth);
     router.push('/');
   };
 
-  if (userLoading) {
+  if (isUserLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>

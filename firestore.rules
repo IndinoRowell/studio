@@ -1,100 +1,42 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    /**
-     * NEULib Connect Security Rules
-     *
-     * Core Philosophy:
-     * This ruleset implements a hybrid security model combining strict Path-Based Ownership for user 
-     * profiles and Field-Based Ownership for visitor records. Administrative access is decoupled 
-     * from user profile data using a high-performance "Existence Check" pattern.
-     *
-     * Data Structure:
-     * - /users/{userId}: Primary profile storage where document ID matches the Firebase Auth UID.
-     * - /visitorLogs/{logId}: Flat collection for visit history, indexed by a denormalized 'visitorId'.
-     * - /roles_admin/{adminId}: A registry of administrative UIDs used for instant role verification.
-     *
-     * Key Security Decisions:
-     * 1. Authorization Independence: We avoid cross-document lookups (get() calls) by denormalizing 
-     *    the 'visitorId' onto every log entry.
-     * 2. Administrative Registry: Global admin privileges are checked via the 'roles_admin' 
-     *    collection. If a UID exists there, the user is granted elevated access.
-     * 3. Relational Integrity: On document creation, we strictly enforce that ownership fields 
-     *    match the authenticated user's UID to prevent data spoofing.
-     *
-     * Prototyping Mode:
-     * These rules prioritize secure authorization and relational integrity while remaining 
-     * flexible regarding the internal schema of content fields (e.g., 'firstName', 'reasonForVisit').
-     */
-
     // --- Helper Functions ---
-
-    /** Checks if the request is from an authenticated user. */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /** Checks if the authenticated user's UID matches the provided ID. */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /** 
-     * Checks if the user is an administrator by verifying their existence 
-     * in the dedicated roles_admin collection. 
-     */
     function isAdmin() {
       return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
 
-    /** Verifies ownership for operations on existing documents. */
-    function isExistingOwner(ownerId) {
-      return resource != null && isOwner(ownerId);
-    }
-
     // --- Collection Rules ---
 
-    /**
-     * @description Rules for user profile documents. Allows users to manage their own data and Admins to view all.
-     * @path /users/{userId}
-     * @allow (create) if the userId in the path matches request.auth.uid.
-     * @deny (update) if a user attempts to change their own 'id' field or modify another user's profile.
-     * @principle Path-based ownership and relational integrity.
-     */
     match /users/{userId} {
       allow get: if isOwner(userId) || isAdmin();
       allow list: if isOwner(userId) || isAdmin();
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isOwner(userId) && request.resource.data.id == resource.data.id;
+      allow create: if (isOwner(userId) && request.resource.data.id == userId) || isAdmin();
+      allow update: if (isOwner(userId) && request.resource.data.id == resource.data.id) || isAdmin();
       allow delete: if isAdmin();
     }
 
-    /**
-     * @description Rules for library visit logs. Users can create/read their own; Admins have full oversight.
-     * @path /visitorLogs/{visitorLogId}
-     * @allow (get) if resource.data.visitorId matches the user's UID.
-     * @deny (create) if the 'visitorId' field in the new data does not match the authenticated user.
-     * @principle Field-based ownership (denormalization) for performant authorization.
-     */
     match /visitorLogs/{visitorLogId} {
       allow get: if isAdmin() || (isSignedIn() && resource.data.visitorId == request.auth.uid);
       allow list: if isAdmin() || isSignedIn();
       allow create: if isSignedIn() && request.resource.data.visitorId == request.auth.uid;
-      allow update: if isAdmin() || (isExistingOwner(resource.data.visitorId) && request.resource.data.visitorId == resource.data.visitorId);
+      allow update: if isAdmin() || (isSignedIn() && resource.data.visitorId == request.auth.uid);
       allow delete: if isAdmin();
     }
 
-    /**
-     * @description Rules for the administrative registry. Access is restricted to ensure system integrity.
-     * @path /roles_admin/{adminId}
-     * @allow (get) if the requester is an admin.
-     * @deny (create, update, delete) all client-side requests to prevent self-elevation of privileges.
-     * @principle Existence-over-content for high-performance role-based access control.
-     */
     match /roles_admin/{adminId} {
       allow get, list: if isAdmin();
-      allow create, update, delete: if false; // Managed via Admin SDK or Super-Admin
+      allow create, update, delete: if false; 
     }
   }
 }

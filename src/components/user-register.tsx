@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -12,8 +13,11 @@ import { Loader2, UserPlus, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { useAuth } from '@/firebase';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { useAuth, useFirestore } from '@/firebase';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 const registerSchema = z.object({
   displayName: z.string().min(2, "Name must be at least 2 characters"),
@@ -31,6 +35,7 @@ export function UserRegister() {
   const router = useRouter();
   const { toast } = useToast();
   const auth = useAuth();
+  const db = useFirestore();
 
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
@@ -47,18 +52,40 @@ export function UserRegister() {
     setError(null);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
-      await updateProfile(userCredential.user, {
+      const user = userCredential.user;
+
+      await updateProfile(user, {
         displayName: values.displayName
       });
       
+      // Create initial profile in Firestore
+      const profileData = {
+        id: user.uid,
+        displayName: values.displayName,
+        email: values.email,
+        role: 'Student', // Default role
+        college: 'Unassigned', // Default college
+        createdAt: serverTimestamp(),
+      };
+
+      setDoc(doc(db, 'users', user.uid), profileData)
+        .catch((err) => {
+          const permissionError = new FirestorePermissionError({
+            path: `users/${user.uid}`,
+            operation: 'create',
+            requestResourceData: profileData,
+          });
+          errorEmitter.emit('permission-error', permissionError);
+        });
+
       toast({
         title: "Welcome to NEU Library!",
         description: "Your account has been successfully created. Happy learning!",
       });
       router.push('/user');
-    } catch (error: any) {
+    } catch (err: any) {
       let message = "Registration failed. Please try again.";
-      if (error.code === 'auth/email-already-in-use') {
+      if (err.code === 'auth/email-already-in-use') {
         message = "This email is already registered. Please sign in instead.";
       }
       setError(message);

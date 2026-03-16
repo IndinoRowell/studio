@@ -1,155 +1,94 @@
+
 {
   "entities": {
     "User": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "User",
+      "description": "Represents a library member (Student, Faculty, or Staff).",
       "type": "object",
-      "description": "Represents a user account in the NEULib Connect system, defining their authentication profile (externally managed) and access role.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the User entity."
+          "description": "The unique identifier, matching the Firebase Auth UID."
         },
-        "firstName": {
+        "displayName": {
           "type": "string",
-          "description": "The first name of the user."
-        },
-        "lastName": {
-          "type": "string",
-          "description": "The last name of the user."
+          "description": "Full name of the user."
         },
         "email": {
           "type": "string",
-          "description": "The email address of the user, typically used for identification or communication. Authentication details are managed externally.",
-          "format": "email"
-        },
-        "role": {
-          "type": "string",
-          "description": "The access role assigned to the user within the NEULib Connect system (e.g., 'Admin', 'Visitor'). This is crucial for role-based access control."
-        },
-        "createdAt": {
-          "type": "string",
-          "description": "The timestamp indicating when the user account was first created.",
-          "format": "date-time"
-        },
-        "updatedAt": {
-          "type": "string",
-          "description": "The timestamp indicating when the user account information was last updated.",
-          "format": "date-time"
-        }
-      },
-      "required": [
-        "id",
-        "firstName",
-        "lastName",
-        "email",
-        "role",
-        "createdAt"
-      ]
-    },
-    "VisitorLog": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "VisitorLog",
-      "type": "object",
-      "description": "Records details of a single visit to the NEU Library, capturing visitor information for statistical analysis and insights.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the VisitorLog entity."
-        },
-        "visitorId": {
-          "type": "string",
-          "description": "Reference to the User who made this visit. (Relationship: User 1:N VisitorLog)"
-        },
-        "visitDateTime": {
-          "type": "string",
-          "description": "The exact date and time when the visitor checked into the library.",
-          "format": "date-time"
-        },
-        "reasonForVisit": {
-          "type": "string",
-          "description": "The primary reason or purpose for the visitor's library visit (e.g., 'Study', 'Research', 'Event', 'Meeting'). This field supports filtering statistics."
+          "format": "email",
+          "description": "University email address."
         },
         "college": {
           "type": "string",
-          "description": "The college or department affiliation of the visitor (e.g., 'College of Engineering', 'Khoury College of Computer Sciences'). This field supports filtering statistics."
+          "description": "College or department affiliation."
         },
-        "isEmployee": {
-          "type": "boolean",
-          "description": "A boolean flag indicating whether the visitor is an employee (teacher or staff) of the university. This field supports filtering statistics."
-        },
-        "employeeType": {
+        "role": {
           "type": "string",
-          "description": "If 'isEmployee' is true, this field specifies the type of employee (e.g., 'Teacher', 'Staff'). This field is conditional and relevant only for employees."
+          "enum": ["Student", "Faculty", "Staff"],
+          "description": "User's role within the university."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the profile was created."
         }
       },
-      "required": [
-        "id",
-        "visitorId",
-        "visitDateTime",
-        "reasonForVisit",
-        "college",
-        "isEmployee"
-      ]
+      "required": ["id", "email", "role"]
+    },
+    "VisitorLog": {
+      "title": "VisitorLog",
+      "description": "A record of a single library visit.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique log ID."
+        },
+        "visitorId": {
+          "type": "string",
+          "description": "The UID of the visitor."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the visitor at the time of check-in."
+        },
+        "reason": {
+          "type": "string",
+          "description": "Reason for the visit (e.g., Study, Research)."
+        },
+        "college": {
+          "type": "string",
+          "description": "College affiliation at the time of check-in."
+        },
+        "employeeStatus": {
+          "type": "string",
+          "description": "Status (Student, Faculty, Staff)."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Date and time of check-in."
+        }
+      },
+      "required": ["visitorId", "reason", "college", "employeeStatus", "timestamp"]
     }
   },
   "auth": {
-    "providers": [
-      "password",
-      "anonymous"
-    ]
+    "providers": ["password", "anonymous"]
   },
   "firestore": {
-    "structure": [
-      {
-        "path": "/users/{userId}",
-        "definition": {
-          "entityName": "User",
-          "schema": {
-            "$ref": "#/backend/entities/User"
-          },
-          "description": "Stores individual user profiles. Each document is uniquely identified by the user's authentication UID. Access is primarily restricted to the user themselves for their own profile. Includes denormalized 'role' for basic client-side logic, though 'roles_admin' is used for critical server-side authorization checks.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier (UID) of the user, matching `request.auth.uid`."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/visitorLogs/{visitorLogId}",
-        "definition": {
-          "entityName": "VisitorLog",
-          "schema": {
-            "$ref": "#/backend/entities/VisitorLog"
-          },
-          "description": "Contains all visitor check-in records. Each document includes `visitorId` to explicitly link it to the user who made the visit, ensuring authorization independence. Admins can list and filter all documents; regular users can only read their own documents, typically by querying `where('visitorId', '==', request.auth.uid)`.",
-          "params": [
-            {
-              "name": "visitorLogId",
-              "description": "The unique identifier for a specific visitor log entry."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/roles_admin/{adminId}",
-        "definition": {
-          "entityName": "admin",
-          "schema": {
-            "$ref": "#/backend/entities/User"
-          },
-          "description": "A dedicated collection to implement role-based access control for administrators using the 'existence over content' strategy. A document in this collection indicates that the user with the corresponding `adminId` (which is their UID) has administrator privileges. This enables secure and atomic admin role checks in security rules via `exists()` without fetching user profile data.",
-          "params": [
-            {
-              "name": "adminId",
-              "description": "The unique identifier (UID) of a user who is designated as an administrator."
-            }
-          ]
-        }
-      }
-    ],
-    "reasoning": "The recommended Firestore structure for NEULib Connect prioritizes security, scalability, and debuggability, adhering strictly to the core design principles. We define three main collections: 'users', 'visitorLogs', and 'roles_admin'.\n\n**Authorization Independence:**\n1.  **User Profiles (`/users/{userId}`):** User profiles are stored in `/users/{userId}` where `{userId}` directly corresponds to `request.auth.uid`. This path-based ownership ensures that rules for a user's own profile (`request.auth.uid == userId`) are atomic and do not require `get()` calls to other documents. The 'role' field is included in the User entity, but the primary method for checking 'Admin' status for critical operations is through the dedicated `roles_admin` collection, further enhancing independence.\n2.  **Visitor Logs (`/visitorLogs/{visitorLogId}`):** Each `VisitorLog` document explicitly includes the `visitorId` field. This denormalizes the ownership information directly into the document. Consequently, security rules can evaluate `resource.data.visitorId == request.auth.uid` without needing to perform a `get()` operation on a parent user document. This makes access control for individual logs completely independent, robust, and atomic for transactions or batch writes.\n3.  **Admin Roles (`/roles_admin/{adminId}`):** This dedicated collection is a cornerstone of authorization independence for global roles. Instead of embedding roles deeply within user profiles and relying on `get()` calls to `users/{userId}` to fetch a role, we use an 'existence over content' model. An admin's `uid` will have a corresponding document in this collection. Security rules can check admin status with a simple `exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))`. This is the most performant and secure way to manage global roles, avoiding complex `get()` calls and ensuring authorization independence.\n\n**QAPs (Rules are not Filters):**\n1.  **Admin Viewing All Visitor Statistics:** The `/visitorLogs` collection's flat structure is designed to facilitate Quality Access Patterns for administrators. Because all visitor logs are in a single top-level collection, an admin (whose `uid` exists in `/roles_admin`) can perform `list` queries across the entire collection. The security rules will grant `read` access based on the admin role check (`exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))`) *before* any query filters (e.g., by date, college, reason) are applied. This ensures that the rule itself is not acting as a filter, and the client can freely query any subset of the data that the rule allows them to access.\n2.  **Visitor Viewing Own Logs:** Regular visitors can only view their own logs. The `visitorId` field in each `VisitorLog` document allows for secure `list` queries. Security rules can enforce that `list` operations for non-admins must include a `where('visitorId', '==', request.auth.uid)` clause in the query, or for `get` operations, `resource.data.visitorId == request.auth.uid`. This ensures that visitors only see data they own, while admins can access all data, satisfying QAPs for both roles through structural segregation and denormalized authorization fields."
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Stores user profiles. Access is restricted to the owner or admins."
+    },
+    "/visitorLogs/{logId}": {
+      "schema": "VisitorLog",
+      "description": "Stores library check-in records."
+    },
+    "/roles_admin/{adminId}": {
+      "schema": "User",
+      "description": "Registry for administrative access."
+    }
   }
 }
