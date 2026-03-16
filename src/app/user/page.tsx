@@ -1,5 +1,4 @@
-
-"use client"
+'use client';
 
 import React, { useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
@@ -87,7 +86,7 @@ export default function UserDashboardPage() {
               </Link>
             )}
 
-            <Button variant="ghost" size="sm" onClick={handleSignSignOut} className="text-muted-foreground hover:text-destructive">
+            <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-muted-foreground hover:text-destructive">
               <LogOut className="h-4 w-4 mr-2" />
               Sign Out
             </Button>
@@ -231,8 +230,4 @@ export default function UserDashboardPage() {
       </main>
     </div>
   );
-
-  function handleSignSignOut() {
-    handleSignOut();
-  }
 }
