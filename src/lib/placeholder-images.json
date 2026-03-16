@@ -1,3 +1,16 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-library",
+      "description": "Sophisticated university library interior",
+      "imageUrl": "https://picsum.photos/seed/neulib-hero/1200/600",
+      "imageHint": "university library"
+    },
+    {
+      "id": "admin-bg",
+      "description": "Data analytics and academic growth",
+      "imageUrl": "https://picsum.photos/seed/neulib-admin/800/400",
+      "imageHint": "data visualization"
+    }
+  ]
 }
