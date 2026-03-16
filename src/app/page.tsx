@@ -35,7 +35,7 @@ export default function Home() {
               fill
               className="object-cover opacity-20"
               priority
-              data-ai-hint={heroImage.imageHint}
+              data-ai-hint="university campus"
             />
           )}
           <div className="container mx-auto px-4 text-center z-10">
@@ -44,7 +44,7 @@ export default function Home() {
               System Online & Ready
             </div>
             <h2 className="text-4xl md:text-6xl font-headline font-bold text-primary mb-4">
-              New Era University Campus
+              New Era University
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8 font-body">
               Your gateway to academic excellence and scholarly resources. Please select your portal to proceed.
