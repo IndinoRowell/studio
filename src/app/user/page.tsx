@@ -1,9 +1,8 @@
-
 "use client"
 
 import React, { useMemo, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import { Library, ChevronLeft, Calendar as CalendarIcon, Clock, User as UserIcon, BookOpen, LogOut, Sparkles, School } from "lucide-react";
+import { Library, ChevronLeft, Calendar as CalendarIcon, Clock, User as UserIcon, BookOpen, LogOut, Sparkles, School, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { collection, query, orderBy, limit, where, doc } from 'firebase/firestore';
@@ -17,10 +16,7 @@ export default function UserDashboardPage(props: {
   params: Promise<any>;
   searchParams: Promise<any>;
 }) {
-  const params = React.use(props.params);
-  const searchParams = React.use(props.searchParams);
-
-  const { user, isUserLoading } = useUser();
+  const { user, isUserLoading, isAdmin, isAdminLoading } = useUser();
   const db = useFirestore();
   const auth = useAuth();
   const router = useRouter();
@@ -57,7 +53,7 @@ export default function UserDashboardPage(props: {
     router.push('/');
   };
 
-  if (isUserLoading) {
+  if (isUserLoading || isAdminLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -82,6 +78,16 @@ export default function UserDashboardPage(props: {
               <Library className="h-5 w-5 text-primary" />
               <span className="font-headline font-bold text-primary">NEULib</span>
             </div>
+            
+            {isAdmin && (
+              <Link href="/admin">
+                <Button variant="outline" size="sm" className="gap-2 text-primary border-primary hover:bg-primary hover:text-white">
+                  <ShieldCheck className="h-4 w-4" />
+                  Admin Dashboard
+                </Button>
+              </Link>
+            )}
+
             <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-muted-foreground hover:text-destructive">
               <LogOut className="h-4 w-4 mr-2" />
               Sign Out

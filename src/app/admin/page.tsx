@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { StatsDashboard } from "@/components/admin/stats-dashboard";
 import { UserManagement } from "@/components/admin/user-management";
-import { Library, LogOut, Settings, LayoutDashboard, Loader2, Users } from "lucide-react";
+import { Library, LogOut, Settings, LayoutDashboard, Loader2, Users, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUser, useAuth } from "@/firebase";
 import { useRouter } from "next/navigation";
@@ -11,6 +11,7 @@ import { signOut } from "firebase/auth";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import Link from "next/link";
 
 type AdminView = 'dashboard' | 'users' | 'settings';
 
@@ -18,10 +19,7 @@ export default function AdminPage(props: {
   params: Promise<any>;
   searchParams: Promise<any>;
 }) {
-  const params = React.use(props.params);
-  const searchParams = React.use(props.searchParams);
-  
-  const { user, loading } = useUser();
+  const { user, isUserLoading, isAdmin, isAdminLoading } = useUser();
   const auth = useAuth();
   const router = useRouter();
   const [currentView, setCurrentView] = useState<AdminView>('dashboard');
@@ -29,25 +27,55 @@ export default function AdminPage(props: {
   const campusImage = PlaceHolderImages.find(img => img.id === 'hero-library');
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!isUserLoading && !user) {
       router.push('/login');
     }
-  }, [user, loading, router]);
+  }, [user, isUserLoading, router]);
 
   const handleSignOut = async () => {
     await signOut(auth);
     router.push('/');
   };
 
-  if (loading) {
+  if (isUserLoading || isAdminLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <div className="text-center space-y-4">
+          <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
+          <p className="text-muted-foreground animate-pulse">Verifying Security Credentials...</p>
+        </div>
       </div>
     );
   }
 
   if (!user) return null;
+
+  // Role-based access control check
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="max-w-md w-full text-center space-y-6 bg-white p-8 rounded-xl shadow-2xl border border-destructive/20">
+          <div className="h-20 w-20 bg-destructive/10 text-destructive rounded-full flex items-center justify-center mx-auto">
+            <Library className="h-10 w-10" />
+          </div>
+          <div className="space-y-2">
+            <h1 className="text-2xl font-bold text-primary font-headline">Access Restricted</h1>
+            <p className="text-muted-foreground">
+              Your account does not have administrative privileges. Please contact the system administrator for access.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Link href="/user">
+              <Button className="w-full bg-primary hover:bg-primary/90">Go to User Portal</Button>
+            </Link>
+            <Button variant="ghost" onClick={handleSignOut} className="w-full text-muted-foreground">
+              Sign Out
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative flex min-h-screen overflow-hidden">
@@ -62,11 +90,10 @@ export default function AdminPage(props: {
             priority
           />
         )}
-        {/* Semi-transparent white overlay to ensure contrast while keeping the image visible */}
         <div className="absolute inset-0 bg-white/80 backdrop-blur-[1px]" />
       </div>
 
-      {/* Sidebar - Reverted to solid primary */}
+      {/* Sidebar */}
       <aside className="w-64 bg-primary text-primary-foreground flex flex-col hidden lg:flex sticky top-0 h-screen shadow-2xl z-20">
         <div className="p-6 flex items-center gap-2 mb-8 border-b border-white/10">
           <Library className="h-8 w-8" />
@@ -109,7 +136,16 @@ export default function AdminPage(props: {
           </Button>
         </nav>
 
-        <div className="p-6 border-t border-white/10">
+        <div className="p-6 border-t border-white/10 space-y-2">
+          <Link href="/user">
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start gap-3 text-white/70 hover:text-white hover:bg-white/10"
+            >
+              <UserCircle className="h-5 w-5" />
+              Switch to User Portal
+            </Button>
+          </Link>
           <Button 
             variant="ghost" 
             className="w-full justify-start gap-3 text-white/70 hover:text-white hover:bg-white/10"
