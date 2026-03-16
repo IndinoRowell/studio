@@ -17,7 +17,7 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.string().email("Please enter a valid university email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
@@ -42,21 +42,22 @@ export function ManualLogin() {
     setError(null);
     try {
       await signInWithEmailAndPassword(auth, values.email, values.password);
-      // Removed success toast per guidelines (toasts for errors only)
       router.push('/admin');
     } catch (error: any) {
-      let message = "Invalid credentials. Please check your email and password.";
+      let message = "Authentication failed. Please check your credentials.";
       
       if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
         message = "The password you entered is incorrect. Please try again.";
       } else if (error.code === 'auth/user-not-found') {
-        message = "No account found with this email address.";
+        message = "No account found with this email address. Please contact the administrator.";
+      } else if (error.code === 'auth/invalid-email') {
+        message = "The email address format is invalid. Please use a valid email.";
       }
 
       setError(message);
       toast({
         variant: 'destructive',
-        title: "Login Failed",
+        title: "Login Error",
         description: message,
       });
     } finally {
@@ -75,8 +76,8 @@ export function ManualLogin() {
       setError("Google sign-in failed. Please try again.");
       toast({
         variant: 'destructive',
-        title: "Google Sign-In Failed",
-        description: error.message || "Could not complete Google authentication.",
+        title: "Google Authentication Failed",
+        description: error.message || "Could not complete Google sign-in.",
       });
     } finally {
       setIsGoogleLoading(false);
@@ -89,7 +90,7 @@ export function ManualLogin() {
         {error && (
           <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-1">
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Authentication Error</AlertTitle>
+            <AlertTitle>Access Denied</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
@@ -101,7 +102,7 @@ export function ManualLogin() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email Address</FormLabel>
+                  <FormLabel>University Email</FormLabel>
                   <FormControl>
                     <Input placeholder="admin@neu.edu.ph" {...field} />
                   </FormControl>
