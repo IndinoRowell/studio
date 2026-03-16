@@ -16,7 +16,7 @@
     }
   },
   "auth": {
-    "providers": ["google.com", "password"]
+    "providers": ["google.com", "password", "anonymous"]
   },
   "firestore": {
     "/logs/{logId}": {

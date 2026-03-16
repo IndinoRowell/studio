@@ -1,11 +1,14 @@
+
 "use client"
 
 import { useEffect, useRef, useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, Scan, CheckCircle2, Info } from "lucide-react";
+import { Loader2, CheckCircle2, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { signInAnonymously } from 'firebase/auth';
+import { useAuth } from '@/firebase';
 
 export function CardScanner() {
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
@@ -14,11 +17,22 @@ export function CardScanner() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const { toast } = useToast();
   const router = useRouter();
+  const auth = useAuth();
+  
+  // Use a ref to prevent multiple initialization and to track timeouts
+  const initializationRef = useRef(false);
+  const scanTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const redirectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
+    if (initializationRef.current) return;
+    initializationRef.current = true;
+
     const getCameraPermission = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+        streamRef.current = stream;
         setHasCameraPermission(true);
 
         if (videoRef.current) {
@@ -26,24 +40,41 @@ export function CardScanner() {
         }
 
         // Simulate a successful scan after 5 seconds of feed
-        const scanTimeout = setTimeout(() => {
-          setIsScanning(false);
-          setScanComplete(true);
-          toast({
-            title: "Card Recognized",
-            description: "NEU Administrator Identity Verified.",
-          });
-          
-          // Stop the stream
-          stream.getTracks().forEach(track => track.stop());
+        scanTimeoutRef.current = setTimeout(async () => {
+          try {
+            // Perform actual sign-in to prevent the Scanner -> Admin -> Scanner redirect loop
+            await signInAnonymously(auth);
+            
+            setIsScanning(false);
+            setScanComplete(true);
+            
+            toast({
+              title: "Card Recognized",
+              description: "NEU Administrator Identity Verified.",
+            });
+            
+            // Stop the stream
+            if (streamRef.current) {
+              streamRef.current.getTracks().forEach(track => track.stop());
+              streamRef.current = null;
+            }
 
-          // Redirect to admin after a brief success animation
-          setTimeout(() => {
-            router.push('/admin');
-          }, 1500);
+            // Redirect to admin after a brief success animation
+            redirectTimeoutRef.current = setTimeout(() => {
+              router.push('/admin');
+            }, 1500);
+          } catch (signInError: any) {
+            console.error('Sign-in failed:', signInError);
+            toast({
+              variant: 'destructive',
+              title: 'Authentication Failed',
+              description: 'Could not verify ID card. Please try manual login.',
+            });
+            // Allow retry if needed
+            initializationRef.current = false;
+            setIsScanning(true);
+          }
         }, 5000);
-
-        return () => clearTimeout(scanTimeout);
 
       } catch (error) {
         console.error('Error accessing camera:', error);
@@ -59,13 +90,14 @@ export function CardScanner() {
     getCameraPermission();
 
     return () => {
-      // Cleanup: stop tracks if component unmounts
-      if (videoRef.current && videoRef.current.srcObject) {
-        const stream = videoRef.current.srcObject as MediaStream;
-        stream.getTracks().forEach(track => track.stop());
+      // Cleanup: stop tracks and clear timeouts
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
       }
+      if (scanTimeoutRef.current) clearTimeout(scanTimeoutRef.current);
+      if (redirectTimeoutRef.current) clearTimeout(redirectTimeoutRef.current);
     };
-  }, [router, toast]);
+  }, [auth, router, toast]);
 
   return (
     <div className="space-y-6">
