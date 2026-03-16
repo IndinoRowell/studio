@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import { Library, ChevronLeft, Calendar as CalendarIcon, Clock, User as UserIcon, BookOpen, LogOut, Sparkles, School, ShieldCheck } from "lucide-react";
+import { Library, ChevronLeft, Calendar as CalendarIcon, Clock, User as UserIcon, BookOpen, LogOut, Sparkles, School, ShieldCheck, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { collection, query, orderBy, limit, where, doc } from 'firebase/firestore';
@@ -33,7 +33,7 @@ export default function UserDashboardPage() {
   const { data: profile } = useDoc(profileRef);
 
   // Fetch recent check-ins for the user
-  // This query is constrained by visitorId to match Security Rules
+  // We ensure the filter on visitorId is applied to match security rules
   const recentLogsQuery = useMemoFirebase(() => {
     if (!db || !user?.uid) return null;
     return query(
@@ -54,7 +54,10 @@ export default function UserDashboardPage() {
   if (isUserLoading || isAdminLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="text-center space-y-4">
+          <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
+          <p className="text-muted-foreground animate-pulse font-body text-sm">Initializing Secure Access...</p>
+        </div>
       </div>
     );
   }
@@ -104,7 +107,7 @@ export default function UserDashboardPage() {
             <h1 className="text-4xl font-headline font-bold text-primary">User Dashboard</h1>
             <p className="text-muted-foreground">
               Hello, {user.displayName || user.email}. 
-              {profile && ` You are recognized as a ${profile.role} from the ${profile.college}.`}
+              {profile && profile.role !== 'Unassigned' ? ` You are recognized as a ${profile.role} from the ${profile.college}.` : " Please complete your profile at the library counter."}
             </p>
           </div>
         </header>
@@ -122,7 +125,7 @@ export default function UserDashboardPage() {
               <CardContent>
                 {logsLoading ? (
                   <div className="py-12 flex flex-col items-center justify-center text-muted-foreground space-y-4">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     <p>Loading activity log...</p>
                   </div>
                 ) : logs && logs.length > 0 ? (
@@ -178,7 +181,7 @@ export default function UserDashboardPage() {
               </CardContent>
             </Card>
 
-            {profile && (
+            {profile && profile.role !== 'Unassigned' && (
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center gap-2">

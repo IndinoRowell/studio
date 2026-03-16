@@ -19,7 +19,8 @@ service cloud.firestore {
 
     match /users/{userId} {
       // Users can see their own profile, admins can see all.
-      allow read: if isOwner(userId) || isAdmin();
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin(); // Only admins can list the directory
       
       // Allow registration and updates by owner or admin
       allow create: if (isOwner(userId) && request.resource.data.id == userId) || isAdmin();
@@ -28,9 +29,9 @@ service cloud.firestore {
     }
 
     match /visitorLogs/{logId} {
-      // Allow listing if the user is an admin OR if they are filtering by their own visitorId.
-      // Firestore enforces that the query MUST include a filter on visitorId matching the auth UID.
-      allow list: if isSignedIn() && (isAdmin() || (resource.data.visitorId == request.auth.uid));
+      // Allow listing if the user is filtering by their own visitorId OR if they are an admin.
+      // We use the 'resource.data' check which Firestore uses to validate queries.
+      allow list: if isSignedIn() && (isAdmin() || resource.data.visitorId == request.auth.uid);
       
       // Allow getting a single document
       allow get: if isSignedIn() && (isAdmin() || resource.data.visitorId == request.auth.uid);
