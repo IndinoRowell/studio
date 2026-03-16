@@ -1,8 +1,14 @@
 import { VisitorLog, VisitReason, College, EmployeeStatus } from './types';
-import { subDays, startOfDay, endOfDay } from 'date-fns';
+import { subDays } from 'date-fns';
 
 const reasons: VisitReason[] = ['Study', 'Borrow/Return', 'Research', 'Computer Use', 'Meeting', 'Others'];
-const colleges: College[] = ['CAS', 'CBA', 'CED', 'CEAS', 'CHM', 'CON', 'LAW', 'Graduate School'];
+const colleges: College[] = [
+  'Accountancy', 'Agriculture', 'Arts and Sciences', 'Business Administration', 
+  'Communication', 'Criminology', 'Education', 'Engineering and Architecture', 
+  'Informatics and Computing Studies', 'Law', 'Music', 'International Relations', 
+  'Medicine', 'Nursing', 'Medical Technology', 'Physical Therapy', 
+  'Respiratory Therapy', 'Midwifery', 'Graduate Studies', 'Basic Education'
+];
 const statuses: EmployeeStatus[] = ['Student', 'Faculty', 'Staff'];
 
 export const generateMockLogs = (days: number = 30): VisitorLog[] => {

@@ -1,6 +1,6 @@
 "use client"
 
-import { StatisticsFilter, VisitReason, College, EmployeeStatus } from "@/lib/types";
+import { StatisticsFilter } from "@/lib/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -47,14 +47,26 @@ export function AdminFilters({ onFilterChange }: AdminFiltersProps) {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Colleges</SelectItem>
-            <SelectItem value="CAS">CAS</SelectItem>
-            <SelectItem value="CBA">CBA</SelectItem>
-            <SelectItem value="CED">CED</SelectItem>
-            <SelectItem value="CEAS">CEAS</SelectItem>
-            <SelectItem value="CHM">CHM</SelectItem>
-            <SelectItem value="CON">CON</SelectItem>
-            <SelectItem value="LAW">LAW</SelectItem>
-            <SelectItem value="Graduate School">Graduate School</SelectItem>
+            <SelectItem value="Accountancy">Accountancy</SelectItem>
+            <SelectItem value="Agriculture">Agriculture</SelectItem>
+            <SelectItem value="Arts and Sciences">Arts and Sciences</SelectItem>
+            <SelectItem value="Business Administration">Business Administration</SelectItem>
+            <SelectItem value="Communication">Communication</SelectItem>
+            <SelectItem value="Criminology">Criminology</SelectItem>
+            <SelectItem value="Education">Education</SelectItem>
+            <SelectItem value="Engineering and Architecture">Engineering and Architecture</SelectItem>
+            <SelectItem value="Informatics and Computing Studies">Informatics and Computing Studies</SelectItem>
+            <SelectItem value="Law">Law</SelectItem>
+            <SelectItem value="Music">Music</SelectItem>
+            <SelectItem value="International Relations">International Relations</SelectItem>
+            <SelectItem value="Medicine">Medicine</SelectItem>
+            <SelectItem value="Nursing">Nursing</SelectItem>
+            <SelectItem value="Medical Technology">Medical Technology</SelectItem>
+            <SelectItem value="Physical Therapy">Physical Therapy</SelectItem>
+            <SelectItem value="Respiratory Therapy">Respiratory Therapy</SelectItem>
+            <SelectItem value="Midwifery">Midwifery</SelectItem>
+            <SelectItem value="Graduate Studies">Graduate Studies</SelectItem>
+            <SelectItem value="Basic Education">Basic Education</SelectItem>
           </SelectContent>
         </Select>
       </div>

@@ -15,7 +15,13 @@ import { useToast } from "@/hooks/use-toast";
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   reason: z.enum(['Study', 'Borrow/Return', 'Research', 'Computer Use', 'Meeting', 'Others']),
-  college: z.enum(['CAS', 'CBA', 'CED', 'CEAS', 'CHM', 'CON', 'LAW', 'Graduate School']),
+  college: z.enum([
+    'Accountancy', 'Agriculture', 'Arts and Sciences', 'Business Administration', 
+    'Communication', 'Criminology', 'Education', 'Engineering and Architecture', 
+    'Informatics and Computing Studies', 'Law', 'Music', 'International Relations', 
+    'Medicine', 'Nursing', 'Medical Technology', 'Physical Therapy', 
+    'Respiratory Therapy', 'Midwifery', 'Graduate Studies', 'Basic Education'
+  ]),
   employeeStatus: z.enum(['Student', 'Faculty', 'Staff']),
 });
 
@@ -155,14 +161,26 @@ export function CheckInForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="CAS">College of Arts and Sciences (CAS)</SelectItem>
-                      <SelectItem value="CBA">College of Business Administration (CBA)</SelectItem>
-                      <SelectItem value="CED">College of Education (CED)</SelectItem>
-                      <SelectItem value="CEAS">College of Eng. and Architecture (CEAS)</SelectItem>
-                      <SelectItem value="CHM">College of Hospitality Management (CHM)</SelectItem>
-                      <SelectItem value="CON">College of Nursing (CON)</SelectItem>
-                      <SelectItem value="LAW">College of Law (LAW)</SelectItem>
-                      <SelectItem value="Graduate School">Graduate School</SelectItem>
+                      <SelectItem value="Accountancy">College of Accountancy</SelectItem>
+                      <SelectItem value="Agriculture">College of Agriculture</SelectItem>
+                      <SelectItem value="Arts and Sciences">College of Arts and Sciences</SelectItem>
+                      <SelectItem value="Business Administration">College of Business Administration</SelectItem>
+                      <SelectItem value="Communication">College of Communication</SelectItem>
+                      <SelectItem value="Criminology">College of Criminology</SelectItem>
+                      <SelectItem value="Education">College of Education</SelectItem>
+                      <SelectItem value="Engineering and Architecture">College of Engineering and Architecture</SelectItem>
+                      <SelectItem value="Informatics and Computing Studies">College of Informatics and Computing Studies</SelectItem>
+                      <SelectItem value="Law">College of Law</SelectItem>
+                      <SelectItem value="Music">College of Music</SelectItem>
+                      <SelectItem value="International Relations">School of International Relations</SelectItem>
+                      <SelectItem value="Medicine">College of Medicine</SelectItem>
+                      <SelectItem value="Nursing">College of Nursing</SelectItem>
+                      <SelectItem value="Medical Technology">College of Medical Technology</SelectItem>
+                      <SelectItem value="Physical Therapy">College of Physical Therapy</SelectItem>
+                      <SelectItem value="Respiratory Therapy">College of Respiratory Therapy</SelectItem>
+                      <SelectItem value="Midwifery">College of Midwifery</SelectItem>
+                      <SelectItem value="Graduate Studies">School of Graduate Studies</SelectItem>
+                      <SelectItem value="Basic Education">Basic Education</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
