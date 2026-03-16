@@ -1,6 +1,7 @@
+
 "use client"
 
-import React, { useMemo, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Library, ChevronLeft, Calendar as CalendarIcon, Clock, User as UserIcon, BookOpen, LogOut, Sparkles, School, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,10 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
 
-export default function UserDashboardPage(props: {
-  params: Promise<any>;
-  searchParams: Promise<any>;
-}) {
+export default function UserDashboardPage() {
   const { user, isUserLoading, isAdmin, isAdminLoading } = useUser();
   const db = useFirestore();
   const auth = useAuth();
@@ -33,9 +31,10 @@ export default function UserDashboardPage(props: {
     return doc(db, 'users', user.uid);
   }, [db, user?.uid]);
 
-  const { data: profile, isLoading: profileLoading } = useDoc(profileRef);
+  const { data: profile } = useDoc(profileRef);
 
   // Fetch recent check-ins for the user
+  // This query is constrained by visitorId to match Security Rules
   const recentLogsQuery = useMemoFirebase(() => {
     if (!db || !user?.uid) return null;
     return query(
@@ -88,7 +87,7 @@ export default function UserDashboardPage(props: {
               </Link>
             )}
 
-            <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-muted-foreground hover:text-destructive">
+            <Button variant="ghost" size="sm" onClick={handleSignSignOut} className="text-muted-foreground hover:text-destructive">
               <LogOut className="h-4 w-4 mr-2" />
               Sign Out
             </Button>
@@ -106,7 +105,7 @@ export default function UserDashboardPage(props: {
             <h1 className="text-4xl font-headline font-bold text-primary">User Dashboard</h1>
             <p className="text-muted-foreground">
               Hello, {user.displayName || user.email}. 
-              {profile && ` You are recognized as a ${profile.role} from the College of ${profile.college}.`}
+              {profile && ` You are recognized as a ${profile.role} from the ${profile.college}.`}
             </p>
           </div>
         </header>
@@ -232,4 +231,8 @@ export default function UserDashboardPage(props: {
       </main>
     </div>
   );
+
+  function handleSignSignOut() {
+    handleSignOut();
+  }
 }
