@@ -28,7 +28,7 @@ export default function Home() {
 
       {/* Hero Section */}
       <main className="flex-grow">
-        <section className="relative h-[60vh] flex items-center justify-center overflow-hidden">
+        <section className="relative h-[65vh] flex items-center justify-center overflow-hidden">
           {heroImage && (
             <>
               <Image
@@ -39,14 +39,14 @@ export default function Home() {
                 priority
                 data-ai-hint="university campus"
               />
-              {/* Dark Overlay for Readability */}
-              <div className="absolute inset-0 bg-black/50 z-0" />
+              {/* Overlay for Contrast */}
+              <div className="absolute inset-0 bg-black/40 z-0" />
             </>
           )}
           <div className="container mx-auto px-4 text-center z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100/90 text-green-800 text-xs font-medium mb-6 backdrop-blur-sm animate-pulse">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100/90 text-green-800 text-xs font-medium mb-6 backdrop-blur-sm shadow-sm">
               <CheckCircle className="h-3 w-3" />
-              System Online & Ready
+              System Online
             </div>
             <h2 className="text-5xl md:text-7xl font-headline font-bold text-white mb-6 drop-shadow-lg">
               New Era University
@@ -60,7 +60,7 @@ export default function Home() {
         {/* Role Selection */}
         <section className="container mx-auto px-4 py-16">
           <div className="grid md:grid-cols-2 gap-10 max-w-5xl mx-auto">
-            <Card className="hover:shadow-xl transition-all border-2 hover:border-accent group">
+            <Card className="hover:shadow-xl transition-all border-2 hover:border-accent group bg-card">
               <CardHeader className="text-center">
                 <div className="mx-auto bg-accent/10 p-6 rounded-full w-fit mb-4 group-hover:scale-110 transition-transform">
                   <User className="h-12 w-12 text-accent" />
@@ -77,7 +77,7 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            <Card className="hover:shadow-xl transition-all border-2 hover:border-primary group">
+            <Card className="hover:shadow-xl transition-all border-2 hover:border-primary group bg-card">
               <CardHeader className="text-center">
                 <div className="mx-auto bg-primary/10 p-6 rounded-full w-fit mb-4 group-hover:scale-110 transition-transform">
                   <ShieldCheck className="h-12 w-12 text-primary" />
