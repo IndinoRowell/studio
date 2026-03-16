@@ -1,10 +1,10 @@
-
 'use client';
 
-import { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext, ReactNode, useEffect } from 'react';
 import { FirebaseApp } from 'firebase/app';
 import { Firestore } from 'firebase/firestore';
 import { Auth } from 'firebase/auth';
+import { errorEmitter } from './error-emitter';
 
 interface FirebaseContextProps {
   app: FirebaseApp;
@@ -25,6 +25,15 @@ export const FirebaseProvider = ({
   firestore: Firestore;
   auth: Auth;
 }) => {
+  useEffect(() => {
+    const handlePermissionError = (error: any) => {
+      // In a real environment, this might trigger a dev overlay
+      console.warn('Firebase Permission Error detected:', error.context);
+    };
+
+    errorEmitter.on('permission-error', handlePermissionError);
+  }, []);
+
   return (
     <FirebaseContext.Provider value={{ app, firestore, auth }}>
       {children}

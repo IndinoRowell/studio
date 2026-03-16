@@ -5,12 +5,16 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/form-provider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { useFirestore } from '@/firebase';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -29,6 +33,7 @@ export function CheckInForm() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const db = useFirestore();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -39,15 +44,30 @@ export function CheckInForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      setIsSubmitted(true);
-      toast({
-        title: "Check-in Successful",
-        description: `Welcome to NEU Library, ${values.name}!`,
+    
+    const logData = {
+      ...values,
+      timestamp: serverTimestamp(),
+    };
+
+    addDoc(collection(db, 'logs'), logData)
+      .then(() => {
+        setIsLoading(false);
+        setIsSubmitted(true);
+        toast({
+          title: "Check-in Successful",
+          description: `Welcome to NEU Library, ${values.name}!`,
+        });
+      })
+      .catch(async (error) => {
+        setIsLoading(false);
+        const permissionError = new FirestorePermissionError({
+          path: '/logs',
+          operation: 'create',
+          requestResourceData: logData,
+        });
+        errorEmitter.emit('permission-error', permissionError);
       });
-    }, 1500);
   }
 
   if (isSubmitted) {

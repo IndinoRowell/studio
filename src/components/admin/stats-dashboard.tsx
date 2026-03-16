@@ -1,13 +1,12 @@
-
 "use client"
 
 import { useState, useMemo, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MOCK_LOGS } from "@/lib/mock-data";
-import { StatisticsFilter } from "@/lib/types";
+import { generateMockLogs } from "@/lib/mock-data";
+import { StatisticsFilter, VisitorLog } from "@/lib/types";
 import { isSameDay, isWithinInterval, startOfWeek } from "date-fns";
-import { Users, BookOpen, GraduationCap, Briefcase } from "lucide-react";
+import { Users, BookOpen, GraduationCap, Briefcase, Loader2 } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { AdminFilters } from './filters';
 import { AIInsights } from './ai-insights';
@@ -18,15 +17,18 @@ export function StatsDashboard() {
   const [activeTab, setActiveTab] = useState('today');
   const [filters, setFilters] = useState<Partial<StatisticsFilter>>({});
   const [isMounted, setIsMounted] = useState(false);
+  const [allLogs, setAllLogs] = useState<VisitorLog[]>([]);
 
   useEffect(() => {
+    // Generate mock data only on client to avoid hydration mismatch
+    setAllLogs(generateMockLogs(500));
     setIsMounted(true);
   }, []);
 
   const filteredLogs = useMemo(() => {
     if (!isMounted) return [];
     
-    let logs = MOCK_LOGS;
+    let logs = allLogs;
     const now = new Date();
 
     // Time filter
@@ -49,7 +51,7 @@ export function StatsDashboard() {
     }
 
     return logs;
-  }, [activeTab, filters, isMounted]);
+  }, [activeTab, filters, allLogs, isMounted]);
 
   const stats = useMemo(() => {
     const total = filteredLogs.length;
@@ -75,18 +77,19 @@ export function StatsDashboard() {
   const pieData = Object.entries(stats.reasonCounts).map(([name, value]) => ({ name, value }));
   const barData = Object.entries(stats.collegeCounts).map(([name, value]) => ({ name, value }));
 
-  // Prevent hydration mismatch by showing a loading state until mounted
   if (!isMounted) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-        <p className="text-muted-foreground animate-pulse font-body">Synchronizing dashboard analytics...</p>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-muted-foreground animate-pulse font-body text-sm uppercase tracking-widest">
+          Synchronizing Library Analytics...
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-3xl font-headline font-bold text-primary">Visitor Analytics</h2>
@@ -195,7 +198,7 @@ export function StatsDashboard() {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={barData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="name" fontSize={12} tickLine={false} axisLine={false} />
+                <XAxis dataKey="name" fontSize={10} tickLine={false} axisLine={false} interval={0} angle={-45} textAnchor="end" height={80} />
                 <YAxis fontSize={12} tickLine={false} axisLine={false} />
                 <Tooltip />
                 <Bar dataKey="value" fill="#3385cc" radius={[4, 4, 0, 0]} />

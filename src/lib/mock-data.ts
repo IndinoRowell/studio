@@ -11,11 +11,11 @@ const colleges: College[] = [
 ];
 const statuses: EmployeeStatus[] = ['Student', 'Faculty', 'Staff'];
 
-export const generateMockLogs = (days: number = 30): VisitorLog[] => {
+export const generateMockLogs = (count: number = 100, days: number = 30): VisitorLog[] => {
   const logs: VisitorLog[] = [];
   const now = new Date();
 
-  for (let i = 0; i < 500; i++) {
+  for (let i = 0; i < count; i++) {
     const randomDaysAgo = Math.floor(Math.random() * days);
     const randomHours = Math.floor(Math.random() * 24);
     const randomMinutes = Math.floor(Math.random() * 60);
@@ -24,7 +24,7 @@ export const generateMockLogs = (days: number = 30): VisitorLog[] => {
     timestamp.setHours(randomHours, randomMinutes);
 
     logs.push({
-      id: `log-${i}`,
+      id: `mock-log-${i}`,
       timestamp,
       reason: reasons[Math.floor(Math.random() * reasons.length)],
       college: colleges[Math.floor(Math.random() * colleges.length)],
@@ -35,5 +35,3 @@ export const generateMockLogs = (days: number = 30): VisitorLog[] => {
 
   return logs.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 };
-
-export const MOCK_LOGS = generateMockLogs();
