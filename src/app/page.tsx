@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -33,7 +34,7 @@ export default function Home() {
               src={heroImage.imageUrl}
               alt={heroImage.description}
               fill
-              className="object-cover opacity-20"
+              className="object-cover opacity-30"
               priority
               data-ai-hint="university campus"
             />
@@ -95,7 +96,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="bg-white border-t py-8">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>© {new Date().getFullYear()} NEULib Connect. All rights reserved.</p>
+          <p>© 2025 NEULib Connect. All rights reserved.</p>
         </div>
       </footer>
     </div>
