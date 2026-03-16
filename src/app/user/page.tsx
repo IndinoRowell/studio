@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo, useEffect } from 'react';
@@ -225,7 +224,7 @@ export default function UserDashboardPage() {
                 </div>
                 <div className="pt-2">
                   <p className="text-muted-foreground leading-relaxed italic">
-                    "Educating the soul is the heart of education."
+                    "Godliness is the foundation of knowledge."
                   </p>
                 </div>
               </CardContent>
