@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -9,12 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, Lock } from "lucide-react";
+import { Loader2, Lock, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { useAuth } from '@/firebase';
 import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -24,6 +24,7 @@ const loginSchema = z.object({
 export function ManualLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const { toast } = useToast();
   const auth = useAuth();
@@ -38,18 +39,25 @@ export function ManualLogin() {
 
   async function onSubmit(values: z.infer<typeof loginSchema>) {
     setIsLoading(true);
+    setError(null);
     try {
       await signInWithEmailAndPassword(auth, values.email, values.password);
-      toast({
-        title: "Welcome back!",
-        description: "Successfully signed in.",
-      });
+      // Removed success toast per guidelines (toasts for errors only)
       router.push('/admin');
     } catch (error: any) {
+      let message = "Invalid credentials. Please check your email and password.";
+      
+      if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+        message = "The password you entered is incorrect. Please try again.";
+      } else if (error.code === 'auth/user-not-found') {
+        message = "No account found with this email address.";
+      }
+
+      setError(message);
       toast({
         variant: 'destructive',
         title: "Login Failed",
-        description: error.message || "Invalid credentials.",
+        description: message,
       });
     } finally {
       setIsLoading(false);
@@ -58,15 +66,13 @@ export function ManualLogin() {
 
   async function handleGoogleSignIn() {
     setIsGoogleLoading(true);
+    setError(null);
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
-      toast({
-        title: "Welcome!",
-        description: "Successfully signed in with Google.",
-      });
       router.push('/admin');
     } catch (error: any) {
+      setError("Google sign-in failed. Please try again.");
       toast({
         variant: 'destructive',
         title: "Google Sign-In Failed",
@@ -80,6 +86,14 @@ export function ManualLogin() {
   return (
     <Card className="border-2 border-primary/10">
       <CardContent className="pt-6 space-y-6">
+        {error && (
+          <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-1">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Authentication Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
