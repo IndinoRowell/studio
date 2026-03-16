@@ -4,7 +4,8 @@
 import { useState } from 'react';
 import { CardScanner } from "@/components/card-scanner";
 import { ManualLogin } from "@/components/manual-login";
-import { Library, ChevronLeft, CreditCard, UserCircle } from "lucide-react";
+import { AdminRegister } from "@/components/admin-register";
+import { Library, ChevronLeft, CreditCard, UserCircle, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -31,18 +32,22 @@ export default function LoginPage() {
         <div className="w-full max-w-md space-y-8">
           <div className="text-center space-y-2">
             <h1 className="text-3xl font-headline font-bold text-primary">System Access</h1>
-            <p className="text-muted-foreground">Scan your ID card or sign in manually</p>
+            <p className="text-muted-foreground">Choose your preferred access method</p>
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="scanner" className="gap-2">
-                <CreditCard className="h-4 w-4" />
-                Card Scanner
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="scanner" className="gap-2 text-xs sm:text-sm">
+                <CreditCard className="h-4 w-4 hidden sm:inline" />
+                Scanner
               </TabsTrigger>
-              <TabsTrigger value="manual" className="gap-2">
-                <UserCircle className="h-4 w-4" />
-                Manual Login
+              <TabsTrigger value="manual" className="gap-2 text-xs sm:text-sm">
+                <UserCircle className="h-4 w-4 hidden sm:inline" />
+                Login
+              </TabsTrigger>
+              <TabsTrigger value="register" className="gap-2 text-xs sm:text-sm">
+                <UserPlus className="h-4 w-4 hidden sm:inline" />
+                Register
               </TabsTrigger>
             </TabsList>
 
@@ -52,6 +57,10 @@ export default function LoginPage() {
 
             <TabsContent value="manual" className="mt-6">
               <ManualLogin />
+            </TabsContent>
+
+            <TabsContent value="register" className="mt-6">
+              <AdminRegister />
             </TabsContent>
           </Tabs>
 

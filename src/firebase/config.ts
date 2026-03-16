@@ -1,6 +1,6 @@
 
 export const firebaseConfig = {
-  apiKey: "AIzaSyAs-V0m-V1-X2-Y3-Z4-W5-V6-U7-T8-S9-R0",
+  apiKey: "AIzaSyAs-V0m-V1-X2-Y3-Z4-W5-V6-U7-T8-S9-R0", // Note: Replace this with your actual key from Firebase Console if the error persists
   authDomain: "neulib-connect.firebaseapp.com",
   projectId: "neulib-connect",
   storageBucket: "neulib-connect.firebasestorage.app",
