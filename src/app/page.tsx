@@ -44,7 +44,7 @@ export default function Home() {
               System Online & Ready
             </div>
             <h2 className="text-4xl md:text-6xl font-headline font-bold text-primary mb-4">
-              Welcome to NEU Library
+              New Era University Campus
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8 font-body">
               Your gateway to academic excellence and scholarly resources. Please select your portal to proceed.
