@@ -1,12 +1,13 @@
+
 "use client"
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MOCK_LOGS } from "@/lib/mock-data";
-import { StatisticsFilter, VisitReason, College, EmployeeStatus } from "@/lib/types";
-import { isSameDay, isWithinInterval, startOfDay, endOfDay, subDays, startOfWeek } from "date-fns";
-import { Users, BookOpen, GraduationCap, Briefcase, TrendingUp } from "lucide-react";
+import { StatisticsFilter } from "@/lib/types";
+import { isSameDay, isWithinInterval, startOfWeek } from "date-fns";
+import { Users, BookOpen, GraduationCap, Briefcase } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { AdminFilters } from './filters';
 import { AIInsights } from './ai-insights';
@@ -16,8 +17,15 @@ const COLORS = ['#2e3a75', '#3385cc', '#4f46e5', '#6366f1', '#818cf8', '#a5b4fc'
 export function StatsDashboard() {
   const [activeTab, setActiveTab] = useState('today');
   const [filters, setFilters] = useState<Partial<StatisticsFilter>>({});
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const filteredLogs = useMemo(() => {
+    if (!isMounted) return [];
+    
     let logs = MOCK_LOGS;
     const now = new Date();
 
@@ -41,7 +49,7 @@ export function StatsDashboard() {
     }
 
     return logs;
-  }, [activeTab, filters]);
+  }, [activeTab, filters, isMounted]);
 
   const stats = useMemo(() => {
     const total = filteredLogs.length;
@@ -66,6 +74,16 @@ export function StatsDashboard() {
 
   const pieData = Object.entries(stats.reasonCounts).map(([name, value]) => ({ name, value }));
   const barData = Object.entries(stats.collegeCounts).map(([name, value]) => ({ name, value }));
+
+  // Prevent hydration mismatch by showing a loading state until mounted
+  if (!isMounted) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+        <p className="text-muted-foreground animate-pulse font-body">Synchronizing dashboard analytics...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
