@@ -3,9 +3,8 @@
 
 import { useState } from 'react';
 import { ManualLogin } from "@/components/manual-login";
-import { AdminRegister } from "@/components/admin-register";
 import { CardScanner } from "@/components/card-scanner";
-import { Library, ChevronLeft, UserCircle, UserPlus, Scan } from "lucide-react";
+import { Library, ChevronLeft, UserCircle, Scan } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -36,7 +35,7 @@ export default function LoginPage() {
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="manual" className="gap-2 text-xs">
                 <UserCircle className="h-4 w-4 hidden sm:inline" />
                 Login
@@ -44,10 +43,6 @@ export default function LoginPage() {
               <TabsTrigger value="scanner" className="gap-2 text-xs">
                 <Scan className="h-4 w-4 hidden sm:inline" />
                 ID Scanner
-              </TabsTrigger>
-              <TabsTrigger value="register" className="gap-2 text-xs">
-                <UserPlus className="h-4 w-4 hidden sm:inline" />
-                Register
               </TabsTrigger>
             </TabsList>
 
@@ -57,10 +52,6 @@ export default function LoginPage() {
 
             <TabsContent value="scanner" className="mt-6">
               <CardScanner />
-            </TabsContent>
-
-            <TabsContent value="register" className="mt-6">
-              <AdminRegister />
             </TabsContent>
           </Tabs>
 
