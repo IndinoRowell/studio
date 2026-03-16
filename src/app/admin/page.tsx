@@ -10,6 +10,8 @@ import { useUser, useAuth } from "@/firebase";
 import { useRouter } from "next/navigation";
 import { signOut } from "firebase/auth";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 type AdminView = 'dashboard' | 'users' | 'settings';
 
@@ -18,6 +20,8 @@ export default function AdminPage() {
   const auth = useAuth();
   const router = useRouter();
   const [currentView, setCurrentView] = useState<AdminView>('dashboard');
+
+  const campusImage = PlaceHolderImages.find(img => img.id === 'hero-library');
 
   useEffect(() => {
     if (!loading && !user) {
@@ -41,9 +45,24 @@ export default function AdminPage() {
   if (!user) return null;
 
   return (
-    <div className="flex min-h-screen bg-background">
-      {/* Sidebar */}
-      <aside className="w-64 bg-primary text-primary-foreground flex flex-col hidden lg:flex sticky top-0 h-screen shadow-xl">
+    <div className="relative flex min-h-screen overflow-hidden">
+      {/* Background Layer */}
+      <div className="fixed inset-0 z-0">
+        {campusImage && (
+          <Image
+            src={campusImage.imageUrl}
+            alt="Campus Background"
+            fill
+            className="object-cover"
+            priority
+          />
+        )}
+        {/* Semi-transparent white overlay to ensure contrast while keeping the image visible */}
+        <div className="absolute inset-0 bg-white/80 backdrop-blur-[1px]" />
+      </div>
+
+      {/* Sidebar - Semi-transparent */}
+      <aside className="w-64 bg-primary/40 backdrop-blur-xl text-primary-foreground flex flex-col hidden lg:flex sticky top-0 h-screen shadow-2xl z-20 border-r border-white/10">
         <div className="p-6 flex items-center gap-2 mb-8 border-b border-white/10">
           <Library className="h-8 w-8" />
           <h1 className="text-2xl font-headline font-bold tracking-tight">NEULib Admin</h1>
@@ -98,8 +117,8 @@ export default function AdminPage() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-4 md:p-8 lg:p-12 overflow-y-auto">
-        <header className="flex items-center justify-between mb-8 pb-6 border-b">
+      <main className="flex-1 p-4 md:p-8 lg:p-12 overflow-y-auto relative z-10">
+        <header className="flex items-center justify-between mb-8 pb-6 border-b border-primary/10">
           <div>
             <p className="text-muted-foreground text-sm uppercase tracking-widest font-semibold">
               {currentView === 'dashboard' ? 'Overview' : currentView === 'users' ? 'Community' : 'Configuration'}
