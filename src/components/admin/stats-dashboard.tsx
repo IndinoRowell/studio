@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo, useEffect } from 'react';
@@ -20,18 +21,19 @@ export function StatsDashboard() {
   const [allLogs, setAllLogs] = useState<VisitorLog[]>([]);
 
   useEffect(() => {
-    // Generate mock data only on client to avoid hydration mismatch
+    // We only generate data and mark as mounted on the client
+    // This prevents the "Hydration failed" error where server numbers != client numbers
     setAllLogs(generateMockLogs(500));
     setIsMounted(true);
   }, []);
 
   const filteredLogs = useMemo(() => {
+    // If not mounted, we return empty to match server initial state (which is the loader)
     if (!isMounted) return [];
     
     let logs = allLogs;
     const now = new Date();
 
-    // Time filter
     if (activeTab === 'today') {
       logs = logs.filter(log => isSameDay(log.timestamp, now));
     } else if (activeTab === 'week') {
@@ -39,7 +41,6 @@ export function StatsDashboard() {
       logs = logs.filter(log => isWithinInterval(log.timestamp, { start, end: now }));
     }
 
-    // Advanced filters
     if (filters.reason) {
       logs = logs.filter(log => log.reason === filters.reason);
     }
@@ -77,6 +78,7 @@ export function StatsDashboard() {
   const pieData = Object.entries(stats.reasonCounts).map(([name, value]) => ({ name, value }));
   const barData = Object.entries(stats.collegeCounts).map(([name, value]) => ({ name, value }));
 
+  // Crucial: Always return the same skeleton on the server and initial client render
   if (!isMounted) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
