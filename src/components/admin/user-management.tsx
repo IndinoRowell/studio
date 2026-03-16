@@ -73,8 +73,8 @@ export function UserManagement() {
         setIsDialogOpen(false);
         form.reset();
         toast({
-          title: "User Added",
-          description: `${values.displayName} has been successfully registered with the provided initial password.`,
+          title: "User Successfully Registered",
+          description: `Welcome to NEU Library, ${values.displayName}! Your account is now active.`,
         });
       })
       .catch(async (error) => {

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -53,8 +52,8 @@ export function UserRegister() {
       });
       
       toast({
-        title: "Account Created",
-        description: "Welcome to the NEU Library community!",
+        title: "Welcome to NEU Library!",
+        description: "Your account has been successfully created. Happy learning!",
       });
       router.push('/user');
     } catch (error: any) {
