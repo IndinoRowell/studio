@@ -1,8 +1,7 @@
-
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { User, ShieldCheck, Library } from "lucide-react";
+import { User, ShieldCheck, Library, CheckCircle } from "lucide-react";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 
@@ -40,6 +39,10 @@ export default function Home() {
             />
           )}
           <div className="container mx-auto px-4 text-center z-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium mb-4 animate-pulse">
+              <CheckCircle className="h-3 w-3" />
+              System Online & Ready
+            </div>
             <h2 className="text-4xl md:text-6xl font-headline font-bold text-primary mb-4">
               Welcome to NEU Library
             </h2>
