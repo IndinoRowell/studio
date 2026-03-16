@@ -5,7 +5,12 @@ import { User, ShieldCheck, Library, CheckCircle } from "lucide-react";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 
-export default function Home() {
+export default async function Home(props: {
+  params: Promise<any>;
+  searchParams: Promise<any>;
+}) {
+  const params = await props.params;
+  const searchParams = await props.searchParams;
   const heroImage = PlaceHolderImages.find(img => img.id === 'hero-library');
 
   return (

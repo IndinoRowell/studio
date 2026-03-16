@@ -1,19 +1,21 @@
-
-import type {Metadata} from 'next';
+import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { FirebaseClientProvider } from '@/firebase';
+import React from 'react';
 
 export const metadata: Metadata = {
   title: 'NEULib Connect - Library Management System',
   description: 'Smart Library Visitor Management and Analytics',
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
+export default async function RootLayout(props: {
   children: React.ReactNode;
-}>) {
+  params: Promise<any>;
+}) {
+  const params = await props.params;
+  const children = props.children;
+
   return (
     <html lang="en">
       <head>

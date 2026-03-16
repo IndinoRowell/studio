@@ -1,7 +1,6 @@
-
 'use client';
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { StatsDashboard } from "@/components/admin/stats-dashboard";
 import { UserManagement } from "@/components/admin/user-management";
 import { Library, LogOut, Settings, LayoutDashboard, Loader2, Users } from "lucide-react";
@@ -15,7 +14,13 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 type AdminView = 'dashboard' | 'users' | 'settings';
 
-export default function AdminPage() {
+export default function AdminPage(props: {
+  params: Promise<any>;
+  searchParams: Promise<any>;
+}) {
+  const params = React.use(props.params);
+  const searchParams = React.use(props.searchParams);
+  
   const { user, loading } = useUser();
   const auth = useAuth();
   const router = useRouter();

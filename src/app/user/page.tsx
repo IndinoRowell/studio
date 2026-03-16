@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Library, ChevronLeft, Calendar as CalendarIcon, Clock, User as UserIcon, BookOpen, LogOut, Sparkles, School } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,13 @@ import { Badge } from "@/components/ui/badge";
 import { useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
 
-export default function UserDashboardPage() {
+export default function UserDashboardPage(props: {
+  params: Promise<any>;
+  searchParams: Promise<any>;
+}) {
+  const params = React.use(props.params);
+  const searchParams = React.use(props.searchParams);
+
   const { user, loading: userLoading } = useUser();
   const db = useFirestore();
   const auth = useAuth();
