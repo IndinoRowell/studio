@@ -1,3 +1,4 @@
+
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -77,7 +78,7 @@ export default function Home() {
                 <CardDescription>Manage logs, view statistics, and gain insights</CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col items-center">
-                <Link href="/admin" className="w-full">
+                <Link href="/login" className="w-full">
                   <Button className="w-full bg-primary hover:bg-primary/90">
                     Administrator Login
                   </Button>
