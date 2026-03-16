@@ -1,18 +1,29 @@
 "use client"
 
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import { Library, ChevronLeft, Calendar as CalendarIcon, Clock, User as UserIcon, BookOpen } from "lucide-react";
+import { Library, ChevronLeft, Calendar as CalendarIcon, Clock, User as UserIcon, BookOpen, LogOut, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { collection, query, orderBy, limit } from 'firebase/firestore';
-import { useFirestore, useCollection } from '@/firebase';
+import { useFirestore, useCollection, useUser, useAuth } from '@/firebase';
 import { format } from 'date-fns';
 import { Badge } from "@/components/ui/badge";
+import { useRouter } from 'next/navigation';
+import { signOut } from 'firebase/auth';
 
 export default function UserDashboardPage() {
+  const { user, loading: userLoading } = useUser();
   const db = useFirestore();
+  const auth = useAuth();
+  const router = useRouter();
   
+  useEffect(() => {
+    if (!userLoading && !user) {
+      router.push('/user/login');
+    }
+  }, [user, userLoading, router]);
+
   const recentLogsQuery = useMemo(() => {
     return query(
       collection(db, 'logs'),
@@ -21,7 +32,22 @@ export default function UserDashboardPage() {
     );
   }, [db]);
 
-  const { data: logs, loading } = useCollection(recentLogsQuery);
+  const { data: logs, loading: logsLoading } = useCollection(recentLogsQuery);
+
+  const handleSignOut = async () => {
+    await signOut(auth);
+    router.push('/');
+  };
+
+  if (userLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!user) return null;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -30,20 +56,32 @@ export default function UserDashboardPage() {
           <Link href="/">
             <Button variant="ghost" className="gap-2">
               <ChevronLeft className="h-4 w-4" />
-              Back to Home
+              Home
             </Button>
           </Link>
-          <div className="flex items-center gap-2">
-            <Library className="h-5 w-5 text-primary" />
-            <span className="font-headline font-bold text-primary">NEULib</span>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Library className="h-5 w-5 text-primary" />
+              <span className="font-headline font-bold text-primary">NEULib</span>
+            </div>
+            <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-muted-foreground hover:text-destructive">
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
           </div>
         </div>
       </header>
       
       <main className="container mx-auto p-4 md:p-8 space-y-8">
-        <header>
-          <h1 className="text-4xl font-headline font-bold text-primary">User Dashboard</h1>
-          <p className="text-muted-foreground">View recent library activity and check-in history.</p>
+        <header className="space-y-4">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold animate-in fade-in slide-in-from-left-4 duration-700">
+            <Sparkles className="h-4 w-4" />
+            Welcome to NEU Library!
+          </div>
+          <div>
+            <h1 className="text-4xl font-headline font-bold text-primary">User Dashboard</h1>
+            <p className="text-muted-foreground">Hello, {user.displayName || user.email}. View your library activity here.</p>
+          </div>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -52,12 +90,12 @@ export default function UserDashboardPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Clock className="h-5 w-5 text-accent" />
-                  Recent Check-ins
+                  Recent Library Activity
                 </CardTitle>
                 <CardDescription>The latest entries recorded in the system.</CardDescription>
               </CardHeader>
               <CardContent>
-                {loading ? (
+                {logsLoading ? (
                   <div className="py-12 flex flex-col items-center justify-center text-muted-foreground space-y-4">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                     <p>Loading activity log...</p>
@@ -90,7 +128,7 @@ export default function UserDashboardPage() {
                   </div>
                 ) : (
                   <div className="py-12 text-center text-muted-foreground border-2 border-dashed rounded-lg">
-                    <p>No recent check-ins found.</p>
+                    <p>No recent activity found.</p>
                   </div>
                 )}
               </CardContent>
@@ -102,9 +140,9 @@ export default function UserDashboardPage() {
               <CardHeader>
                 <CardTitle className="font-headline flex items-center gap-2">
                   <UserIcon className="h-5 w-5" />
-                  Quick Entry
+                  Quick Check-in
                 </CardTitle>
-                <CardDescription className="text-primary-foreground/70">Ready for another session?</CardDescription>
+                <CardDescription className="text-primary-foreground/70">Ready for your session?</CardDescription>
               </CardHeader>
               <CardContent>
                 <Link href="/check-in">

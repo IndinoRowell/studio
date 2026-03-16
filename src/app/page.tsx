@@ -18,8 +18,8 @@ export default function Home() {
             <h1 className="text-xl font-bold font-headline text-primary">NEULib Connect</h1>
           </div>
           <nav className="flex items-center gap-4">
-            <Link href="/login">
-              <Button variant="ghost">Sign In</Button>
+            <Link href="/user/login">
+              <Button variant="ghost">User Sign In</Button>
             </Link>
           </nav>
         </div>
@@ -65,12 +65,12 @@ export default function Home() {
                   <User className="h-12 w-12 text-accent" />
                 </div>
                 <CardTitle className="font-headline text-3xl">User Portal</CardTitle>
-                <CardDescription className="text-base">Check-in for your session and view your dashboard</CardDescription>
+                <CardDescription className="text-base">Access your library account, check-in, and view history</CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col items-center">
-                <Link href="/check-in" className="w-full">
+                <Link href="/user/login" className="w-full">
                   <Button className="w-full h-12 text-lg bg-accent hover:bg-accent/90">
-                    User Check-in
+                    User Login
                   </Button>
                 </Link>
               </CardContent>
