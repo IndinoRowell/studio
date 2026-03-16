@@ -2,7 +2,6 @@ import { StatsDashboard } from "@/components/admin/stats-dashboard";
 import { Library, LogOut, Settings, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function AdminPage() {
   return (
@@ -47,10 +46,6 @@ export default function AdminPage() {
               <p className="text-sm font-medium">Administrator</p>
               <p className="text-xs text-muted-foreground">admin@neu.edu.ph</p>
             </div>
-            <Avatar className="h-10 w-10 border-2 border-primary/20">
-              <AvatarImage src="https://picsum.photos/seed/admin-avatar/40/40" />
-              <AvatarFallback>AD</AvatarFallback>
-            </Avatar>
           </div>
         </header>
 
