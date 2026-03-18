@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
-import { Search, Loader2, BookOpen, Calendar, Clock } from 'lucide-react';
+import { Search, Loader2, BookOpen, Calendar, Clock, ClipboardList } from 'lucide-react';
 import { format } from 'date-fns';
 
 export function VisitorLogList() {
@@ -15,6 +15,7 @@ export function VisitorLogList() {
   const [searchTerm, setSearchTerm] = useState("");
 
   const logsQuery = useMemoFirebase(() => {
+    if (!db) return null;
     return query(collection(db, 'visitorLogs'), orderBy('timestamp', 'desc'));
   }, [db]);
 
