@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import { Library, ChevronLeft, Calendar as CalendarIcon, Clock, User as UserIcon, BookOpen, LogOut, Sparkles, School, ShieldCheck, Loader2 } from "lucide-react";
+import { Library, ChevronLeft, Calendar as CalendarIcon, Clock, User as UserIcon, BookOpen, LogOut, Sparkles, School, ShieldCheck, Loader2, ArrowRightLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { collection, query, orderBy, limit, where, doc } from 'firebase/firestore';
@@ -35,7 +35,6 @@ export default function UserDashboardPage() {
   // Fetch recent check-ins for the user
   const recentLogsQuery = useMemoFirebase(() => {
     if (!db || !user?.uid) return null;
-    // Apply explicit filtering to match security rules
     return query(
       collection(db, 'visitorLogs'),
       where('visitorId', '==', user.uid),
@@ -72,23 +71,26 @@ export default function UserDashboardPage() {
     <div className="min-h-screen bg-background flex flex-col">
       <header className="p-4 border-b bg-white/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto flex items-center justify-between">
-          <Link href="/">
-            <Button variant="ghost" className="gap-2">
-              <ChevronLeft className="h-4 w-4" />
-              Home
-            </Button>
-          </Link>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
+            <Link href="/">
+              <Button variant="ghost" size="sm" className="gap-2">
+                <ChevronLeft className="h-4 w-4" />
+                Home
+              </Button>
+            </Link>
             <div className="flex items-center gap-2">
-              <Library className="h-5 w-5 text-primary" />
-              <span className="font-headline font-bold text-primary">NEULib</span>
+              <Library className="h-6 w-6 text-primary" />
+              <span className="font-headline font-bold text-xl text-primary">NEULib Portal</span>
             </div>
-            
+          </div>
+          
+          <div className="flex items-center gap-3">
             {isAdmin && (
               <Link href="/admin">
-                <Button variant="outline" size="sm" className="gap-2 text-primary border-primary hover:bg-primary hover:text-white">
+                <Button variant="default" size="sm" className="gap-2 bg-primary hover:bg-primary/90">
                   <ShieldCheck className="h-4 w-4" />
-                  Admin Dashboard
+                  <span className="hidden sm:inline">Admin Dashboard</span>
+                  <span className="sm:hidden">Admin</span>
                 </Button>
               </Link>
             )}
@@ -101,66 +103,90 @@ export default function UserDashboardPage() {
         </div>
       </header>
       
-      <main className="container mx-auto p-4 md:p-8 space-y-8">
-        <header className="space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold animate-in fade-in duration-700">
-            <Sparkles className="h-4 w-4" />
-            Welcome to NEU Library!
+      <main className="container mx-auto p-4 md:p-8 space-y-8 max-w-7xl">
+        <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold">
+              <Sparkles className="h-4 w-4" />
+              Welcome back to your Library Portal
+            </div>
+            <div>
+              <h1 className="text-4xl font-headline font-bold text-primary flex items-center gap-3">
+                {user.displayName || user.email?.split('@')[0]}
+                {isAdmin && <Badge variant="secondary" className="font-body text-[10px] bg-accent/20 text-accent border-accent/20">ADMIN ACCOUNT</Badge>}
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                {profile && profile.role !== 'Unassigned' 
+                  ? `Authenticated as ${profile.role} • ${profile.college}`
+                  : "Member Profile Active"}
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-4xl font-headline font-bold text-primary">User Dashboard</h1>
-            <p className="text-muted-foreground">
-              Hello, {user.displayName || user.email}. 
-              {profile && profile.role !== 'Unassigned' ? ` You are recognized as a ${profile.role} from the ${profile.college}.` : " Please complete your profile at the library counter."}
-            </p>
-          </div>
+          
+          {isAdmin && (
+            <div className="flex gap-2">
+              <Link href="/admin" className="w-full">
+                <Button variant="outline" className="w-full gap-2 border-primary/20 hover:bg-primary/5 text-primary">
+                  <ArrowRightLeft className="h-4 w-4" />
+                  Switch to Admin View
+                </Button>
+              </Link>
+            </div>
+          )}
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+            <Card className="border-2 border-primary/5 shadow-sm">
+              <CardHeader className="border-b bg-muted/20">
+                <CardTitle className="flex items-center gap-2 text-xl">
                   <Clock className="h-5 w-5 text-accent" />
-                  Your Recent Library Activity
+                  Recent Activity
                 </CardTitle>
-                <CardDescription>Your latest entries recorded in the system.</CardDescription>
+                <CardDescription>Your personal library entry records</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-6">
                 {logsLoading ? (
                   <div className="py-12 flex flex-col items-center justify-center text-muted-foreground space-y-4">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    <p>Loading activity log...</p>
+                    <p>Fetching your records...</p>
                   </div>
                 ) : logs && logs.length > 0 ? (
                   <div className="space-y-4">
                     {logs.map((log: any) => (
-                      <div key={log.id} className="flex items-start justify-between p-4 rounded-lg border bg-card hover:bg-accent/5 transition-colors">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-foreground">{log.name || 'Library Member'}</span>
-                            <Badge variant="secondary" className="text-[10px] uppercase tracking-wider">{log.employeeStatus}</Badge>
+                      <div key={log.id} className="flex items-center justify-between p-4 rounded-xl border bg-card hover:border-accent/30 hover:bg-accent/5 transition-all group">
+                        <div className="flex items-center gap-4">
+                          <div className="h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center text-accent">
+                            <BookOpen className="h-5 w-5" />
                           </div>
-                          <div className="text-sm text-muted-foreground flex flex-wrap gap-x-4">
-                            <span className="flex items-center gap-1">
-                              <BookOpen className="h-3 w-3" />
-                              {log.reason}
-                            </span>
-                            <span className="flex items-center gap-1">
+                          <div>
+                            <p className="font-semibold text-foreground">{log.reason}</p>
+                            <p className="text-xs text-muted-foreground flex items-center gap-1">
                               <CalendarIcon className="h-3 w-3" />
-                              {log.timestamp ? format(log.timestamp.toDate(), 'MMM d, yyyy h:mm a') : 'Just now'}
-                            </span>
+                              {log.timestamp ? format(log.timestamp.toDate(), 'PPP p') : 'Processing...'}
+                            </p>
                           </div>
                         </div>
-                        <div className="text-xs text-muted-foreground font-medium hidden sm:block">
+                        <Badge variant="outline" className="opacity-60 group-hover:opacity-100 transition-opacity">
                           {log.college}
-                        </div>
+                        </Badge>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="py-12 text-center text-muted-foreground border-2 border-dashed rounded-lg">
-                    <p>No recent activity found. Visit the library and check-in!</p>
+                  <div className="py-20 text-center border-2 border-dashed rounded-xl space-y-4 bg-muted/10">
+                    <div className="h-12 w-12 bg-muted rounded-full flex items-center justify-center mx-auto">
+                      <BookOpen className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                    <div className="space-y-2">
+                      <p className="font-semibold">No recent visits</p>
+                      <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                        Your library entries will appear here. Visit the library and check-in to see your history.
+                      </p>
+                    </div>
+                    <Link href="/check-in">
+                      <Button variant="secondary" size="sm">Record your first visit</Button>
+                    </Link>
                   </div>
                 )}
               </CardContent>
@@ -168,68 +194,73 @@ export default function UserDashboardPage() {
           </div>
 
           <div className="space-y-6">
-            <Card className="bg-primary text-primary-foreground border-0 shadow-lg">
+            <Card className="bg-primary text-primary-foreground border-0 shadow-xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all" />
               <CardHeader>
-                <CardTitle className="font-headline flex items-center gap-2">
-                  <UserIcon className="h-5 w-5" />
-                  Quick Check-in
+                <CardTitle className="font-headline text-2xl flex items-center gap-2">
+                  <UserIcon className="h-6 w-6" />
+                  Quick Entry
                 </CardTitle>
-                <CardDescription className="text-primary-foreground/70">Ready for your session?</CardDescription>
+                <CardDescription className="text-primary-foreground/70">Scan or manually record your visit</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-4">
                 <Link href="/check-in">
-                  <Button className="w-full bg-white text-primary hover:bg-white/90">
+                  <Button className="w-full bg-white text-primary hover:bg-white/90 shadow-md h-12 text-lg font-semibold">
                     Check-in Now
                   </Button>
                 </Link>
+                <p className="text-[10px] text-center text-primary-foreground/50 uppercase tracking-tighter">
+                  Authorized access for NEU community members
+                </p>
               </CardContent>
             </Card>
 
-            {profile && profile.role !== 'Unassigned' && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <School className="h-5 w-5 text-accent" />
-                    Profile Details
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm">
-                  <div className="flex justify-between border-b pb-2">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <School className="h-5 w-5 text-accent" />
+                  Profile Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 pt-4">
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between items-center border-b pb-2">
                     <span className="text-muted-foreground">Affiliation</span>
-                    <span className="font-medium">{profile.college}</span>
+                    <span className="font-semibold text-primary">{profile?.college || 'Staff'}</span>
                   </div>
-                  <div className="flex justify-between border-b pb-2">
-                    <span className="text-muted-foreground">Role</span>
-                    <span className="font-medium">{profile.role}</span>
+                  <div className="flex justify-between items-center border-b pb-2">
+                    <span className="text-muted-foreground">Primary Role</span>
+                    <span className="font-semibold text-primary">{profile?.role || (isAdmin ? 'Administrator' : 'Visitor')}</span>
                   </div>
-                  <div className="flex justify-between pt-1">
+                  <div className="flex justify-between items-center pt-1">
                     <span className="text-muted-foreground">Member Since</span>
-                    <span className="font-medium">
-                      {profile.createdAt ? format(profile.createdAt.toDate(), 'MMM yyyy') : 'N/A'}
+                    <span className="font-semibold">
+                      {profile?.createdAt ? format(profile.createdAt.toDate(), 'MMMM yyyy') : format(new Date(), 'MMMM yyyy')}
                     </span>
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                </div>
+              </CardContent>
+            </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Library Info</CardTitle>
+            <Card className="bg-muted/30 border-dashed">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2 text-muted-foreground">
+                  Library Information
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4 text-sm">
-                <div className="flex justify-between border-b pb-2">
-                  <span className="text-muted-foreground">Operating Hours</span>
+              <CardContent className="space-y-3 text-xs">
+                <div className="flex justify-between">
+                  <span>Operating Hours</span>
                   <span className="font-medium">8:00 AM - 9:00 PM</span>
                 </div>
-                <div className="flex justify-between border-b pb-2">
-                  <span className="text-muted-foreground">Location</span>
-                  <span className="font-medium text-right">Main Campus, Quezon City</span>
+                <div className="flex justify-between">
+                  <span>Location</span>
+                  <span className="text-right">NEU Main Campus</span>
                 </div>
-                <div className="pt-2">
-                  <p className="text-muted-foreground leading-relaxed italic">
-                    "Godliness is the foundation of knowledge."
-                  </p>
-                </div>
+                <Separator className="bg-muted-foreground/10" />
+                <p className="text-center italic text-muted-foreground pt-1">
+                  "Godliness is the foundation of knowledge."
+                </p>
               </CardContent>
             </Card>
           </div>

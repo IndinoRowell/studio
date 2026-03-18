@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { StatsDashboard } from "@/components/admin/stats-dashboard";
 import { UserManagement } from "@/components/admin/user-management";
-import { Library, LogOut, Settings, LayoutDashboard, Loader2, Users, UserCircle } from "lucide-react";
+import { Library, LogOut, Settings, LayoutDashboard, Loader2, Users, UserCircle, ArrowRightLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUser, useAuth } from "@/firebase";
 import { useRouter } from "next/navigation";
@@ -12,13 +12,11 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 
 type AdminView = 'dashboard' | 'users' | 'settings';
 
-export default function AdminPage(props: {
-  params: Promise<any>;
-  searchParams: Promise<any>;
-}) {
+export default function AdminPage() {
   const { user, isUserLoading, isAdmin, isAdminLoading } = useUser();
   const auth = useAuth();
   const router = useRouter();
@@ -90,33 +88,38 @@ export default function AdminPage(props: {
             priority
           />
         )}
-        <div className="absolute inset-0 bg-white/80 backdrop-blur-[1px]" />
+        <div className="absolute inset-0 bg-white/90 backdrop-blur-[2px]" />
       </div>
 
       {/* Sidebar */}
-      <aside className="w-64 bg-primary text-primary-foreground flex flex-col hidden lg:flex sticky top-0 h-screen shadow-2xl z-20">
-        <div className="p-6 flex items-center gap-2 mb-8 border-b border-white/10">
-          <Library className="h-8 w-8" />
-          <h1 className="text-2xl font-headline font-bold tracking-tight">NEULib Admin</h1>
+      <aside className="w-72 bg-primary text-primary-foreground flex flex-col hidden lg:flex sticky top-0 h-screen shadow-2xl z-20">
+        <div className="p-8 flex items-center gap-3 mb-4 border-b border-white/10">
+          <div className="bg-white/20 p-2 rounded-lg">
+            <Library className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-xl font-headline font-bold tracking-tight">NEULib</h1>
+            <Badge variant="secondary" className="bg-white/10 text-[10px] text-white/70 hover:bg-white/20 border-0">SYSTEM ADMIN</Badge>
+          </div>
         </div>
         
-        <nav className="flex-grow px-4 space-y-2">
+        <nav className="flex-grow px-4 space-y-2 py-4">
           <Button 
             variant="ghost" 
             className={cn(
-              "w-full justify-start gap-3 transition-all",
-              currentView === 'dashboard' ? "bg-white/20 text-white shadow-sm" : "text-white/70 hover:bg-white/10 hover:text-white"
+              "w-full justify-start gap-4 transition-all h-12 text-base",
+              currentView === 'dashboard' ? "bg-white/20 text-white shadow-md" : "text-white/70 hover:bg-white/10 hover:text-white"
             )}
             onClick={() => setCurrentView('dashboard')}
           >
             <LayoutDashboard className="h-5 w-5" />
-            Dashboard
+            Analytics Overview
           </Button>
           <Button 
             variant="ghost" 
             className={cn(
-              "w-full justify-start gap-3 transition-all",
-              currentView === 'users' ? "bg-white/20 text-white shadow-sm" : "text-white/70 hover:bg-white/10 hover:text-white"
+              "w-full justify-start gap-4 transition-all h-12 text-base",
+              currentView === 'users' ? "bg-white/20 text-white shadow-md" : "text-white/70 hover:bg-white/10 hover:text-white"
             )}
             onClick={() => setCurrentView('users')}
           >
@@ -126,21 +129,21 @@ export default function AdminPage(props: {
           <Button 
             variant="ghost" 
             className={cn(
-              "w-full justify-start gap-3 transition-all",
-              currentView === 'settings' ? "bg-white/20 text-white shadow-sm" : "text-white/70 hover:bg-white/10 hover:text-white"
+              "w-full justify-start gap-4 transition-all h-12 text-base",
+              currentView === 'settings' ? "bg-white/20 text-white shadow-md" : "text-white/70 hover:bg-white/10 hover:text-white"
             )}
             onClick={() => setCurrentView('settings')}
           >
             <Settings className="h-5 w-5" />
-            System Settings
+            System Configuration
           </Button>
         </nav>
 
-        <div className="p-6 border-t border-white/10 space-y-2">
+        <div className="p-6 border-t border-white/10 space-y-3 bg-black/5">
           <Link href="/user">
             <Button 
-              variant="ghost" 
-              className="w-full justify-start gap-3 text-white/70 hover:text-white hover:bg-white/10"
+              variant="secondary" 
+              className="w-full justify-start gap-3 bg-white/10 text-white hover:bg-white/20 border-0 transition-all h-12"
             >
               <UserCircle className="h-5 w-5" />
               Switch to User Portal
@@ -148,47 +151,59 @@ export default function AdminPage(props: {
           </Link>
           <Button 
             variant="ghost" 
-            className="w-full justify-start gap-3 text-white/70 hover:text-white hover:bg-white/10"
+            className="w-full justify-start gap-3 text-white/50 hover:text-white hover:bg-white/10 h-10"
             onClick={handleSignOut}
           >
-            <LogOut className="h-5 w-5" />
-            Sign Out
+            <LogOut className="h-4 w-4" />
+            Logout System
           </Button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-4 md:p-8 lg:p-12 overflow-y-auto relative z-10">
-        <header className="flex items-center justify-between mb-8 pb-6 border-b border-primary/10">
+      <main className="flex-1 p-4 md:p-8 lg:p-10 overflow-y-auto relative z-10">
+        <header className="flex flex-col sm:flex-row sm:items-center justify-between mb-10 gap-4 pb-6 border-b border-primary/10">
           <div>
-            <p className="text-muted-foreground text-sm uppercase tracking-widest font-semibold">
-              {currentView === 'dashboard' ? 'Overview' : currentView === 'users' ? 'Community' : 'Configuration'}
+            <p className="text-muted-foreground text-xs uppercase tracking-widest font-bold mb-1">
+              Admin Control Panel
             </p>
             <h2 className="text-3xl font-headline font-bold text-primary">
-              {currentView === 'dashboard' && "Welcome back, " + (user.displayName || 'Admin')}
-              {currentView === 'users' && "User Management"}
-              {currentView === 'settings' && "System Configuration"}
+              {currentView === 'dashboard' && "System Analytics"}
+              {currentView === 'users' && "Community Records"}
+              {currentView === 'settings' && "Configuration"}
             </h2>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="text-right hidden sm:block">
-              <p className="text-sm font-bold">{user.displayName || 'Administrator'}</p>
-              <p className="text-xs text-muted-foreground">{user.email}</p>
+          
+          <div className="flex items-center gap-6">
+            <div className="hidden md:flex flex-col items-end">
+              <p className="text-sm font-bold text-primary">{user.displayName || 'Administrator'}</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{user.email}</p>
             </div>
-            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold border-2 border-primary/20">
+            
+            <Link href="/user">
+              <Button variant="outline" size="sm" className="gap-2 text-primary border-primary/20 hover:bg-primary hover:text-white transition-all">
+                <ArrowRightLeft className="h-4 w-4" />
+                Go to Portal
+              </Button>
+            </Link>
+            
+            <div className="h-12 w-12 rounded-xl bg-primary shadow-lg flex items-center justify-center text-white font-bold border-2 border-white/50">
               {(user.displayName || user.email || 'A')[0].toUpperCase()}
             </div>
           </div>
         </header>
 
-        <div className="animate-in fade-in duration-500">
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-700">
           {currentView === 'dashboard' && <StatsDashboard />}
           {currentView === 'users' && <UserManagement />}
           {currentView === 'settings' && (
-            <div className="flex items-center justify-center h-[50vh] text-muted-foreground">
-              <div className="text-center space-y-2">
-                <Settings className="h-12 w-12 mx-auto opacity-20" />
-                <p>System settings are currently being optimized.</p>
+            <div className="flex flex-col items-center justify-center h-[50vh] text-muted-foreground">
+              <div className="text-center space-y-4 max-w-sm">
+                <div className="h-20 w-20 bg-muted rounded-full flex items-center justify-center mx-auto opacity-40">
+                  <Settings className="h-10 w-10" />
+                </div>
+                <h3 className="text-xl font-bold text-primary">Under Optimization</h3>
+                <p className="text-sm">Advanced system parameters and API configurations are currently locked for maintenance.</p>
               </div>
             </div>
           )}
