@@ -19,27 +19,31 @@ service cloud.firestore {
     match /users/{userId} {
       // Users can see their own profile, admins can see all.
       allow get: if isSignedIn() && (request.auth.uid == userId || isAdmin());
-      allow list: if isAdmin(); 
+      allow list: if isSignedIn() && isAdmin(); 
       
-      // Allow registration and updates by owner or admin
-      allow create: if isSignedIn() && (request.auth.uid == userId);
+      // Allow registration by owner or admin
+      allow create: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      
+      // Allow updates by owner or admin
       allow update: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      
+      // Only admins can delete profiles
       allow delete: if isAdmin();
     }
 
     match /visitorLogs/{logId} {
-      // Allow list if the query is restricted to the user's own UID or they are an admin.
-      // We use a more direct check to ensure compatibility with filtered queries.
+      // Allow users to see their own logs, admins see all.
       allow list: if isSignedIn() && (
         isAdmin() || 
-        (resource.data.visitorId == request.auth.uid)
+        (resource.data.visitorId == request.auth.uid) ||
+        (request.query.limit <= 100 && request.query.filters.visitorId == request.auth.uid)
       );
       
       // Individual document access
       allow get: if isSignedIn() && (isAdmin() || resource.data.visitorId == request.auth.uid);
       
-      // Allow creation by the visitor themselves
-      allow create: if isSignedIn() && request.resource.data.visitorId == request.auth.uid;
+      // Allow creation by the visitor themselves or an admin
+      allow create: if isSignedIn() && (request.resource.data.visitorId == request.auth.uid || isAdmin());
       
       // Allow updates by the visitor or an admin
       allow update: if isAdmin() || (isSignedIn() && resource.data.visitorId == request.auth.uid);
@@ -55,7 +59,8 @@ service cloud.firestore {
       // Only existing admins can list administrators.
       allow list: if isAdmin();
       
-      allow create, update, delete: if false; 
+      // Initial bootstrap or admin management
+      allow create, update, delete: if isAdmin() || (isSignedIn() && request.auth.token.email == "jcesperanza@neu.edu.ph"); 
     }
   }
 }
