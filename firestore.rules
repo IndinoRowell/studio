@@ -33,7 +33,8 @@ service cloud.firestore {
     // --- Visitor Log Rules ---
     match /visitorLogs/{logId} {
       // Individuals can list and get their own specific logs
-      allow list: if isSignedIn() && request.query.filters.visitorId == request.auth.uid;
+      // The 'list' rule with resource.data automatically validates query filters
+      allow list: if isSignedIn() && resource.data.visitorId == request.auth.uid;
       allow get: if isSignedIn() && resource.data.visitorId == request.auth.uid;
       
       // Administrators have full access to view and manage all logs

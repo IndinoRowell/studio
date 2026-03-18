@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { StatsDashboard } from "@/components/admin/stats-dashboard";
 import { UserManagement } from "@/components/admin/user-management";
-import { Library, LogOut, Settings, LayoutDashboard, Loader2, Users, UserCircle, ArrowRightLeft } from "lucide-react";
+import { Library, LogOut, Settings, LayoutDashboard, Loader2, Users, UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUser, useAuth } from "@/firebase";
 import { useRouter } from "next/navigation";
@@ -140,15 +140,6 @@ export default function AdminPage() {
         </nav>
 
         <div className="p-6 border-t border-white/10 space-y-3 bg-black/5">
-          <Link href="/user">
-            <Button 
-              variant="secondary" 
-              className="w-full justify-start gap-3 bg-white/10 text-white hover:bg-white/20 border-0 transition-all h-12"
-            >
-              <UserCircle className="h-5 w-5" />
-              Switch to User Portal
-            </Button>
-          </Link>
           <Button 
             variant="ghost" 
             className="w-full justify-start gap-3 text-white/50 hover:text-white hover:bg-white/10 h-10"
@@ -179,13 +170,6 @@ export default function AdminPage() {
               <p className="text-sm font-bold text-primary">{user.displayName || 'Administrator'}</p>
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{user.email}</p>
             </div>
-            
-            <Link href="/user">
-              <Button variant="outline" size="sm" className="gap-2 text-primary border-primary/20 hover:bg-primary hover:text-white transition-all">
-                <ArrowRightLeft className="h-4 w-4" />
-                Go to Portal
-              </Button>
-            </Link>
             
             <div className="h-12 w-12 rounded-xl bg-primary shadow-lg flex items-center justify-center text-white font-bold border-2 border-white/50">
               {(user.displayName || user.email || 'A')[0].toUpperCase()}
