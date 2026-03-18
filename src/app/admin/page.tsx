@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { StatsDashboard } from "@/components/admin/stats-dashboard";
 import { UserManagement } from "@/components/admin/user-management";
-import { Library, LogOut, Settings, LayoutDashboard, Loader2, Users, UserCircle } from "lucide-react";
+import { VisitorLogList } from "@/components/admin/visitor-log-list";
+import { Library, LogOut, Settings, LayoutDashboard, Loader2, Users, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUser, useAuth } from "@/firebase";
 import { useRouter } from "next/navigation";
@@ -14,7 +15,7 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 
-type AdminView = 'dashboard' | 'users' | 'settings';
+type AdminView = 'dashboard' | 'users' | 'logs' | 'settings';
 
 export default function AdminPage() {
   const { user, isUserLoading, isAdmin, isAdminLoading } = useUser();
@@ -48,7 +49,6 @@ export default function AdminPage() {
 
   if (!user) return null;
 
-  // Role-based access control check
   if (!isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
@@ -119,6 +119,17 @@ export default function AdminPage() {
             variant="ghost" 
             className={cn(
               "w-full justify-start gap-4 transition-all h-12 text-base",
+              currentView === 'logs' ? "bg-white/20 text-white shadow-md" : "text-white/70 hover:bg-white/10 hover:text-white"
+            )}
+            onClick={() => setCurrentView('logs')}
+          >
+            <ClipboardList className="h-5 w-5" />
+            Visitor Records
+          </Button>
+          <Button 
+            variant="ghost" 
+            className={cn(
+              "w-full justify-start gap-4 transition-all h-12 text-base",
               currentView === 'users' ? "bg-white/20 text-white shadow-md" : "text-white/70 hover:bg-white/10 hover:text-white"
             )}
             onClick={() => setCurrentView('users')}
@@ -160,6 +171,7 @@ export default function AdminPage() {
             </p>
             <h2 className="text-3xl font-headline font-bold text-primary">
               {currentView === 'dashboard' && "System Analytics"}
+              {currentView === 'logs' && "Visitor Log Archive"}
               {currentView === 'users' && "Community Records"}
               {currentView === 'settings' && "Configuration"}
             </h2>
@@ -179,6 +191,7 @@ export default function AdminPage() {
 
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-700">
           {currentView === 'dashboard' && <StatsDashboard />}
+          {currentView === 'logs' && <VisitorLogList />}
           {currentView === 'users' && <UserManagement />}
           {currentView === 'settings' && (
             <div className="flex flex-col items-center justify-center h-[50vh] text-muted-foreground">

@@ -2,14 +2,13 @@
 
 import React, { useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import { Library, ChevronLeft, Calendar as CalendarIcon, Clock, User as UserIcon, BookOpen, LogOut, Sparkles, School, Loader2 } from "lucide-react";
+import { Library, ChevronLeft, Calendar as CalendarIcon, Clock, User as UserIcon, BookOpen, LogOut, Sparkles, School, Loader2, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
-import { collection, query, orderBy, limit, where, doc } from 'firebase/firestore';
-import { useFirestore, useCollection, useUser, useAuth, useMemoFirebase, useDoc } from '@/firebase';
+import { doc } from 'firebase/firestore';
+import { useFirestore, useUser, useAuth, useMemoFirebase, useDoc } from '@/firebase';
 import { format } from 'date-fns';
-import { Badge } from "@/components/ui/badge";
 import { useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
 
@@ -25,27 +24,12 @@ export default function UserDashboardPage() {
     }
   }, [user, isUserLoading, router]);
 
-  // Fetch the user's profile from the users collection by UID
   const profileRef = useMemoFirebase(() => {
     if (!db || !user?.uid) return null;
     return doc(db, 'users', user.uid);
   }, [db, user?.uid]);
 
   const { data: profile } = useDoc(profileRef);
-
-  // Fetch recent check-ins for the user
-  const recentLogsQuery = useMemoFirebase(() => {
-    if (!db || !user?.uid) return null;
-    // Filtered by visitorId to comply with user-level security rules
-    return query(
-      collection(db, 'visitorLogs'),
-      where('visitorId', '==', user.uid),
-      orderBy('timestamp', 'desc'),
-      limit(10)
-    );
-  }, [db, user?.uid]);
-
-  const { data: logs, isLoading: logsLoading } = useCollection(recentLogsQuery);
 
   const handleSignOut = async () => {
     try {
@@ -95,7 +79,7 @@ export default function UserDashboardPage() {
         </div>
       </header>
       
-      <main className="container mx-auto p-4 md:p-8 space-y-8 max-w-7xl">
+      <main className="container mx-auto p-4 md:p-8 space-y-8 max-w-4xl">
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold">
@@ -115,64 +99,7 @@ export default function UserDashboardPage() {
           </div>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
-            <Card className="border-2 border-primary/5 shadow-sm">
-              <CardHeader className="border-b bg-muted/20">
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <Clock className="h-5 w-5 text-accent" />
-                  Your Library Activity
-                </CardTitle>
-                <CardDescription>Records of your recent library visits</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-6">
-                {logsLoading ? (
-                  <div className="py-12 flex flex-col items-center justify-center text-muted-foreground space-y-4">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    <p>Fetching your records...</p>
-                  </div>
-                ) : logs && logs.length > 0 ? (
-                  <div className="space-y-4">
-                    {logs.map((log: any) => (
-                      <div key={log.id} className="flex items-center justify-between p-4 rounded-xl border bg-card hover:border-accent/30 hover:bg-accent/5 transition-all group">
-                        <div className="flex items-center gap-4">
-                          <div className="h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center text-accent">
-                            <BookOpen className="h-5 w-5" />
-                          </div>
-                          <div>
-                            <p className="font-semibold text-foreground">{log.reason}</p>
-                            <p className="text-xs text-muted-foreground flex items-center gap-1">
-                              <CalendarIcon className="h-3 w-3" />
-                              {log.timestamp ? format(log.timestamp.toDate(), 'PPP p') : 'Processing...'}
-                            </p>
-                          </div>
-                        </div>
-                        <Badge variant="outline" className="opacity-60 group-hover:opacity-100 transition-opacity">
-                          {log.college}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="py-20 text-center border-2 border-dashed rounded-xl space-y-4 bg-muted/10">
-                    <div className="h-12 w-12 bg-muted rounded-full flex items-center justify-center mx-auto">
-                      <BookOpen className="h-6 w-6 text-muted-foreground" />
-                    </div>
-                    <div className="space-y-2">
-                      <p className="font-semibold">No visits recorded</p>
-                      <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-                        Your library entries will appear here. Visit the library and check-in to start your log.
-                      </p>
-                    </div>
-                    <Link href="/check-in">
-                      <Button variant="secondary" size="sm">Record your visit</Button>
-                    </Link>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-6">
             <Card className="bg-primary text-primary-foreground border-0 shadow-xl relative overflow-hidden group">
               <div className="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all" />
@@ -195,6 +122,30 @@ export default function UserDashboardPage() {
               </CardContent>
             </Card>
 
+            <Card className="bg-muted/30 border-dashed">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2 text-muted-foreground">
+                  Library Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-xs">
+                <div className="flex justify-between">
+                  <span>Operating Hours</span>
+                  <span className="font-medium">8:00 AM - 9:00 PM</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Location</span>
+                  <span className="text-right">NEU Main Campus</span>
+                </div>
+                <Separator className="bg-muted-foreground/10" />
+                <p className="text-center italic text-muted-foreground pt-1">
+                  "Godliness is the foundation of knowledge."
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="space-y-6">
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">
@@ -222,24 +173,12 @@ export default function UserDashboardPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-muted/30 border-dashed">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2 text-muted-foreground">
-                  Library Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 text-xs">
-                <div className="flex justify-between">
-                  <span>Operating Hours</span>
-                  <span className="font-medium">8:00 AM - 9:00 PM</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Location</span>
-                  <span className="text-right">NEU Main Campus</span>
-                </div>
-                <Separator className="bg-muted-foreground/10" />
-                <p className="text-center italic text-muted-foreground pt-1">
-                  "Godliness is the foundation of knowledge."
+            <Card className="border-accent/10 bg-accent/5">
+              <CardContent className="pt-6 text-center space-y-3">
+                <Info className="h-6 w-6 text-accent mx-auto" />
+                <h3 className="font-bold text-primary">Need Help?</h3>
+                <p className="text-xs text-muted-foreground">
+                  If your details are incorrect or you cannot access specific sections, please visit the main library counter.
                 </p>
               </CardContent>
             </Card>
