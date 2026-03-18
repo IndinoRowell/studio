@@ -20,7 +20,7 @@ export default function UserDashboardPage() {
   
   useEffect(() => {
     if (!isUserLoading && !user) {
-      router.push('/user/login');
+      router.replace('/user/login');
     }
   }, [user, isUserLoading, router]);
 
@@ -33,10 +33,9 @@ export default function UserDashboardPage() {
   const { data: profile } = useDoc(profileRef);
 
   // Fetch recent check-ins for the user
-  // We ensure the filter on visitorId is applied to match security rules
   const recentLogsQuery = useMemoFirebase(() => {
     if (!db || !user?.uid) return null;
-    // The query MUST have this where clause to be allowed by security rules for non-admins
+    // Apply explicit filtering to match security rules
     return query(
       collection(db, 'visitorLogs'),
       where('visitorId', '==', user.uid),
@@ -48,8 +47,12 @@ export default function UserDashboardPage() {
   const { data: logs, isLoading: logsLoading } = useCollection(recentLogsQuery);
 
   const handleSignOut = async () => {
-    await signOut(auth);
-    router.replace('/');
+    try {
+      await signOut(auth);
+      router.replace('/');
+    } catch (error) {
+      console.error("Sign out failed", error);
+    }
   };
 
   if (isUserLoading || isAdminLoading) {
@@ -57,7 +60,7 @@ export default function UserDashboardPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
           <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto" />
-          <p className="text-muted-foreground animate-pulse font-body text-sm">Initializing Secure Access...</p>
+          <p className="text-muted-foreground animate-pulse font-body text-sm">Verifying Session...</p>
         </div>
       </div>
     );
@@ -100,7 +103,7 @@ export default function UserDashboardPage() {
       
       <main className="container mx-auto p-4 md:p-8 space-y-8">
         <header className="space-y-4">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold animate-in fade-in slide-in-from-left-4 duration-700">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold animate-in fade-in duration-700">
             <Sparkles className="h-4 w-4" />
             Welcome to NEU Library!
           </div>
@@ -135,7 +138,7 @@ export default function UserDashboardPage() {
                       <div key={log.id} className="flex items-start justify-between p-4 rounded-lg border bg-card hover:bg-accent/5 transition-colors">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
-                            <span className="font-semibold text-foreground">{log.name || 'Anonymous User'}</span>
+                            <span className="font-semibold text-foreground">{log.name || 'Library Member'}</span>
                             <Badge variant="secondary" className="text-[10px] uppercase tracking-wider">{log.employeeStatus}</Badge>
                           </div>
                           <div className="text-sm text-muted-foreground flex flex-wrap gap-x-4">

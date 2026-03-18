@@ -70,6 +70,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     isAdminLoading: true,
   });
 
+  // Hardcoded Admin Emails
+  const ADMIN_EMAILS = ["jcesperanza@neu.edu.ph"];
+
   useEffect(() => {
     if (!auth) {
       setUserAuthState(prev => ({ ...prev, isUserLoading: false, userError: new Error("Auth service not provided.") }));
@@ -79,17 +82,17 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     const unsubscribeAuth = onAuthStateChanged(
       auth,
       (firebaseUser) => {
+        const isHardcodedAdmin = firebaseUser && ADMIN_EMAILS.includes(firebaseUser.email || '');
         setUserAuthState(prev => ({ 
           ...prev, 
           user: firebaseUser, 
           isUserLoading: false, 
           userError: null,
-          isAdmin: false, // Reset admin status on user change
-          isAdminLoading: !!firebaseUser // Set loading if we have a user to check
+          isAdmin: isHardcodedAdmin || false, 
+          isAdminLoading: firebaseUser && !isHardcodedAdmin ? true : false
         }));
       },
       (error) => {
-        console.error("FirebaseProvider: onAuthStateChanged error:", error);
         setUserAuthState(prev => ({ ...prev, user: null, isUserLoading: false, userError: error, isAdminLoading: false }));
       }
     );
@@ -103,18 +106,24 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
       return;
     }
 
+    const isHardcodedAdmin = ADMIN_EMAILS.includes(userAuthState.user.email || '');
+    if (isHardcodedAdmin) {
+      setUserAuthState(prev => ({ ...prev, isAdmin: true, isAdminLoading: false }));
+      return;
+    }
+
     const adminDocRef = doc(firestore, 'roles_admin', userAuthState.user.uid);
     const unsubscribeAdmin = onSnapshot(adminDocRef, (docSnap) => {
       setUserAuthState(prev => ({
         ...prev,
-        isAdmin: docSnap.exists(),
+        isAdmin: docSnap.exists() || isHardcodedAdmin,
         isAdminLoading: false
       }));
     }, (error) => {
-      // If permission is denied, they are likely not an admin
+      // If permission is denied, they are likely not an admin, but check hardcoded list again
       setUserAuthState(prev => ({
         ...prev,
-        isAdmin: false,
+        isAdmin: isHardcodedAdmin,
         isAdminLoading: false
       }));
     });
