@@ -7,12 +7,12 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Check for hardcoded system administrator email
+    // Direct check for System Admin email to avoid recursive exists checks
     function isSystemAdmin() {
       return isSignedIn() && request.auth.token.email == "jcesperanza@neu.edu.ph";
     }
 
-    // General admin check: system admin OR registered in roles_admin collection
+    // Role-based admin check
     function isAdmin() {
       return isSystemAdmin() || 
         (isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid)));
@@ -20,36 +20,35 @@ service cloud.firestore {
 
     // --- User Profile Rules ---
     match /users/{userId} {
-      // Individuals can access their own profile
+      // Users can access their own profile
       allow get: if isSignedIn() && request.auth.uid == userId;
       
-      // Admins have full access to the directory
+      // Administrators have full control over user records
       allow get, list, create, update, delete: if isAdmin();
 
-      // Allow users to create their own profile during registration
-      allow create: if isSignedIn() && request.auth.uid == userId;
-      allow update: if isSignedIn() && request.auth.uid == userId;
+      // Individual user write operations for onboarding/profile management
+      allow create, update: if isSignedIn() && request.auth.uid == userId;
     }
 
     // --- Visitor Log Rules ---
     match /visitorLogs/{logId} {
-      // SEPARATED USER PRIVILEGE: Individuals can list their own logs if filtered by their UID
+      // Individuals can list and get their own specific logs
       allow list: if isSignedIn() && request.query.filters.visitorId == request.auth.uid;
       allow get: if isSignedIn() && resource.data.visitorId == request.auth.uid;
       
-      // SEPARATED ADMIN PRIVILEGE: Admins can list and access ALL records without restriction
+      // Administrators have full access to view and manage all logs
       allow list, get, create, update, delete: if isAdmin();
       
-      // Allow users to create their own log entries
+      // Allow signed-in users to record their own check-ins
       allow create: if isSignedIn() && request.resource.data.visitorId == request.auth.uid;
     }
 
     // --- Admin Registry Rules ---
     match /roles_admin/{adminId} {
-      // Users can check their own administrative status
+      // Any signed-in user can check their own entry to verify admin status
       allow get: if isSignedIn() && request.auth.uid == adminId;
       
-      // Only the System Admin (hardcoded) can manage the admin registry
+      // Only the primary System Admin can modify the administrator list
       allow list, create, update, delete: if isSystemAdmin();
     }
   }

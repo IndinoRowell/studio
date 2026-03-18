@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
-import { Library, ChevronLeft, Calendar as CalendarIcon, Clock, User as UserIcon, BookOpen, LogOut, Sparkles, School, ShieldCheck, Loader2, ArrowRightLeft } from "lucide-react";
+import { Library, ChevronLeft, Calendar as CalendarIcon, Clock, User as UserIcon, BookOpen, LogOut, Sparkles, School, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
 
 export default function UserDashboardPage() {
-  const { user, isUserLoading, isAdmin, isAdminLoading } = useUser();
+  const { user, isUserLoading } = useUser();
   const db = useFirestore();
   const auth = useAuth();
   const router = useRouter();
@@ -36,7 +36,7 @@ export default function UserDashboardPage() {
   // Fetch recent check-ins for the user
   const recentLogsQuery = useMemoFirebase(() => {
     if (!db || !user?.uid) return null;
-    // We filter by visitorId to satisfy security rules for individual list operations
+    // Filtered by visitorId to comply with user-level security rules
     return query(
       collection(db, 'visitorLogs'),
       where('visitorId', '==', user.uid),
@@ -56,7 +56,7 @@ export default function UserDashboardPage() {
     }
   };
 
-  if (isUserLoading || isAdminLoading) {
+  if (isUserLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -87,17 +87,7 @@ export default function UserDashboardPage() {
           </div>
           
           <div className="flex items-center gap-3">
-            {isAdmin && (
-              <Link href="/admin">
-                <Button variant="default" size="sm" className="gap-2 bg-primary hover:bg-primary/90">
-                  <ShieldCheck className="h-4 w-4" />
-                  <span className="hidden sm:inline">Admin Dashboard</span>
-                  <span className="sm:hidden">Admin</span>
-                </Button>
-              </Link>
-            )}
-
-            <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-muted-foreground hover:text-destructive">
+            <Button variant="ghost" size="sm" onClick={handleSignOut} className="text-muted-foreground hover:text-destructive transition-colors">
               <LogOut className="h-4 w-4 mr-2" />
               Sign Out
             </Button>
@@ -110,31 +100,19 @@ export default function UserDashboardPage() {
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold">
               <Sparkles className="h-4 w-4" />
-              Welcome back to your Library Portal
+              Member Access Portal
             </div>
             <div>
               <h1 className="text-4xl font-headline font-bold text-primary flex items-center gap-3">
                 {user.displayName || user.email?.split('@')[0] || 'NEU Member'}
-                {isAdmin && <Badge variant="secondary" className="font-body text-[10px] bg-accent/20 text-accent border-accent/20">ADMIN ACCOUNT</Badge>}
               </h1>
               <p className="text-muted-foreground mt-1">
                 {profile && profile.role && profile.role !== 'Unassigned' 
-                  ? `Authenticated as ${profile.role} • ${profile.college}`
-                  : user.isAnonymous ? "Anonymous Guest Session" : "Member Profile Active"}
+                  ? `Active ${profile.role} • ${profile.college}`
+                  : user.isAnonymous ? "Guest Session" : "Library Member Profile Active"}
               </p>
             </div>
           </div>
-          
-          {isAdmin && (
-            <div className="flex gap-2">
-              <Link href="/admin" className="w-full">
-                <Button variant="outline" className="w-full gap-2 border-primary/20 hover:bg-primary/5 text-primary">
-                  <ArrowRightLeft className="h-4 w-4" />
-                  Switch to Admin View
-                </Button>
-              </Link>
-            </div>
-          )}
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -143,9 +121,9 @@ export default function UserDashboardPage() {
               <CardHeader className="border-b bg-muted/20">
                 <CardTitle className="flex items-center gap-2 text-xl">
                   <Clock className="h-5 w-5 text-accent" />
-                  Recent Activity
+                  Your Library Activity
                 </CardTitle>
-                <CardDescription>Your personal library entry records</CardDescription>
+                <CardDescription>Records of your recent library visits</CardDescription>
               </CardHeader>
               <CardContent className="pt-6">
                 {logsLoading ? (
@@ -181,13 +159,13 @@ export default function UserDashboardPage() {
                       <BookOpen className="h-6 w-6 text-muted-foreground" />
                     </div>
                     <div className="space-y-2">
-                      <p className="font-semibold">No recent visits</p>
+                      <p className="font-semibold">No visits recorded</p>
                       <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-                        Your library entries will appear here. Visit the library and check-in to see your history.
+                        Your library entries will appear here. Visit the library and check-in to start your log.
                       </p>
                     </div>
                     <Link href="/check-in">
-                      <Button variant="secondary" size="sm">Record your first visit</Button>
+                      <Button variant="secondary" size="sm">Record your visit</Button>
                     </Link>
                   </div>
                 )}
@@ -203,7 +181,7 @@ export default function UserDashboardPage() {
                   <UserIcon className="h-6 w-6" />
                   Quick Entry
                 </CardTitle>
-                <CardDescription className="text-primary-foreground/70">Scan or manually record your visit</CardDescription>
+                <CardDescription className="text-primary-foreground/70">Record your current visit</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Link href="/check-in">
@@ -212,7 +190,7 @@ export default function UserDashboardPage() {
                   </Button>
                 </Link>
                 <p className="text-[10px] text-center text-primary-foreground/50 uppercase tracking-tighter">
-                  Authorized access for NEU community members
+                  Member verification required
                 </p>
               </CardContent>
             </Card>
@@ -221,21 +199,21 @@ export default function UserDashboardPage() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <School className="h-5 w-5 text-accent" />
-                  Profile Details
+                  Membership Details
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 pt-4">
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between items-center border-b pb-2">
-                    <span className="text-muted-foreground">Affiliation</span>
+                    <span className="text-muted-foreground">College</span>
                     <span className="font-semibold text-primary">{profile?.college || 'Staff'}</span>
                   </div>
                   <div className="flex justify-between items-center border-b pb-2">
-                    <span className="text-muted-foreground">Primary Role</span>
-                    <span className="font-semibold text-primary">{profile?.role || (isAdmin ? 'Administrator' : 'Visitor')}</span>
+                    <span className="text-muted-foreground">Classification</span>
+                    <span className="font-semibold text-primary">{profile?.role || 'Visitor'}</span>
                   </div>
                   <div className="flex justify-between items-center pt-1">
-                    <span className="text-muted-foreground">Member Since</span>
+                    <span className="text-muted-foreground">Registration</span>
                     <span className="font-semibold">
                       {profile?.createdAt ? format(profile.createdAt.toDate(), 'MMMM yyyy') : format(new Date(), 'MMMM yyyy')}
                     </span>
