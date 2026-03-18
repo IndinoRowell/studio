@@ -36,7 +36,7 @@ export default function UserDashboardPage() {
   // Fetch recent check-ins for the user
   const recentLogsQuery = useMemoFirebase(() => {
     if (!db || !user?.uid) return null;
-    // We filter by visitorId to satisfy security rules for list operations
+    // We filter by visitorId to satisfy security rules for individual list operations
     return query(
       collection(db, 'visitorLogs'),
       where('visitorId', '==', user.uid),

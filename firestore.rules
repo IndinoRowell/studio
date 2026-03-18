@@ -7,60 +7,50 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Base check for the system administrator
+    // Check for hardcoded system administrator email
     function isSystemAdmin() {
       return isSignedIn() && request.auth.token.email == "jcesperanza@neu.edu.ph";
     }
 
-    // General admin check including system admin and database-registered admins
+    // General admin check: system admin OR registered in roles_admin collection
     function isAdmin() {
       return isSystemAdmin() || 
         (isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid)));
     }
 
-    // --- Collection Rules ---
-
+    // --- User Profile Rules ---
     match /users/{userId} {
-      // Users can see their own profile, admins can see all.
-      allow get: if isSignedIn() && (request.auth.uid == userId || isAdmin());
-      allow list: if isSignedIn() && isAdmin(); 
+      // Individuals can access their own profile
+      allow get: if isSignedIn() && request.auth.uid == userId;
       
-      // Allow registration by owner or admin
-      allow create: if isSignedIn() && (request.auth.uid == userId || isAdmin());
-      
-      // Allow updates by owner or admin
-      allow update: if isSignedIn() && (request.auth.uid == userId || isAdmin());
-      
-      // Only admins can delete profiles
-      allow delete: if isAdmin();
+      // Admins have full access to the directory
+      allow get, list, create, update, delete: if isAdmin();
+
+      // Allow users to create their own profile during registration
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn() && request.auth.uid == userId;
     }
 
+    // --- Visitor Log Rules ---
     match /visitorLogs/{logId} {
-      // Robust list rule: 
-      // 1. Admins can see all records.
-      // 2. Users can see their own records ONLY IF they filter by their UID.
-      allow list: if isSignedIn() && (
-        isAdmin() || 
-        (request.query.filters.visitorId == request.auth.uid)
-      );
+      // SEPARATED USER PRIVILEGE: Individuals can list their own logs if filtered by their UID
+      allow list: if isSignedIn() && request.query.filters.visitorId == request.auth.uid;
+      allow get: if isSignedIn() && resource.data.visitorId == request.auth.uid;
       
-      // Individual document access
-      allow get: if isSignedIn() && (isAdmin() || resource.data.visitorId == request.auth.uid);
+      // SEPARATED ADMIN PRIVILEGE: Admins can list and access ALL records without restriction
+      allow list, get, create, update, delete: if isAdmin();
       
-      // Allow creation by the visitor themselves or an admin
-      allow create: if isSignedIn() && (request.resource.data.visitorId == request.auth.uid || isAdmin());
-      
-      // Allow updates by the visitor or an admin
-      allow update: if isAdmin() || (isSignedIn() && resource.data.visitorId == request.auth.uid);
-      
-      // Only admins can delete logs
-      allow delete: if isAdmin();
+      // Allow users to create their own log entries
+      allow create: if isSignedIn() && request.resource.data.visitorId == request.auth.uid;
     }
 
+    // --- Admin Registry Rules ---
     match /roles_admin/{adminId} {
-      // Users can check their own admin status. System admin manages the registry.
-      allow get: if isSignedIn() && (request.auth.uid == adminId || isSystemAdmin());
-      allow list, create, update, delete: if isSystemAdmin(); 
+      // Users can check their own administrative status
+      allow get: if isSignedIn() && request.auth.uid == adminId;
+      
+      // Only the System Admin (hardcoded) can manage the admin registry
+      allow list, create, update, delete: if isSystemAdmin();
     }
   }
 }
