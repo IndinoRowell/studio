@@ -1,14 +1,14 @@
-
 "use client"
 
 import { useEffect, useRef, useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, CheckCircle2, Info } from "lucide-react";
+import { Loader2, CheckCircle2, Info, FlaskConical, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { signInAnonymously } from 'firebase/auth';
 import { useAuth } from '@/firebase';
+import { Badge } from "@/components/ui/badge";
 
 export function CardScanner() {
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
@@ -101,6 +101,17 @@ export function CardScanner() {
 
   return (
     <div className="space-y-6">
+      <Alert className="bg-amber-50 border-amber-200 text-amber-900">
+        <FlaskConical className="h-4 w-4 text-amber-600" />
+        <AlertTitle className="flex items-center gap-2">
+          Experimental Feature
+          <Badge variant="outline" className="text-[10px] h-4 border-amber-400 text-amber-700 bg-amber-100/50 uppercase">Beta</Badge>
+        </AlertTitle>
+        <AlertDescription className="text-xs">
+          ID Card Recognition is currently in development. If the scanner fails to detect your card within 10 seconds, please use the <strong>Manual Login</strong> tab.
+        </AlertDescription>
+      </Alert>
+
       <div className="bg-primary/5 border border-primary/10 p-4 rounded-lg flex gap-3 items-start">
         <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
         <div className="text-sm">
