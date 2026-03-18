@@ -36,6 +36,7 @@ export default function UserDashboardPage() {
   // Fetch recent check-ins for the user
   const recentLogsQuery = useMemoFirebase(() => {
     if (!db || !user?.uid) return null;
+    // We filter by visitorId to satisfy security rules for list operations
     return query(
       collection(db, 'visitorLogs'),
       where('visitorId', '==', user.uid),
@@ -113,13 +114,13 @@ export default function UserDashboardPage() {
             </div>
             <div>
               <h1 className="text-4xl font-headline font-bold text-primary flex items-center gap-3">
-                {user.displayName || user.email?.split('@')[0]}
+                {user.displayName || user.email?.split('@')[0] || 'NEU Member'}
                 {isAdmin && <Badge variant="secondary" className="font-body text-[10px] bg-accent/20 text-accent border-accent/20">ADMIN ACCOUNT</Badge>}
               </h1>
               <p className="text-muted-foreground mt-1">
-                {profile && profile.role !== 'Unassigned' 
+                {profile && profile.role && profile.role !== 'Unassigned' 
                   ? `Authenticated as ${profile.role} • ${profile.college}`
-                  : "Member Profile Active"}
+                  : user.isAnonymous ? "Anonymous Guest Session" : "Member Profile Active"}
               </p>
             </div>
           </div>

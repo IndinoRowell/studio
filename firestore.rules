@@ -32,11 +32,10 @@ service cloud.firestore {
     }
 
     match /visitorLogs/{logId} {
-      // Allow users to see their own logs, admins see all.
+      // Allow listing if the query is filtered by the user's UID or if the user is an admin
       allow list: if isSignedIn() && (
         isAdmin() || 
-        (resource.data.visitorId == request.auth.uid) ||
-        (request.query.limit <= 100 && request.query.filters.visitorId == request.auth.uid)
+        (request.query.filters.visitorId == request.auth.uid)
       );
       
       // Individual document access
