@@ -7,9 +7,15 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    // Base check for the system administrator (hardcoded)
+    function isSystemAdmin() {
+      return isSignedIn() && request.auth.token.email == "jcesperanza@neu.edu.ph";
+    }
+
+    // General admin check including both system admin and database-registered admins
     function isAdmin() {
       return isSignedIn() && (
-        (request.auth.token.email != null && request.auth.token.email == "jcesperanza@neu.edu.ph") ||
+        isSystemAdmin() || 
         exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))
       );
     }
@@ -52,14 +58,11 @@ service cloud.firestore {
     }
 
     match /roles_admin/{adminId} {
-      // Allow signed-in users to check their own status, or admins to check anyone.
-      allow get: if isSignedIn() && (request.auth.uid == adminId || isAdmin());
-      
-      // Only existing admins can list administrators.
-      allow list: if isAdmin();
-      
-      // Initial bootstrap or admin management
-      allow create, update, delete: if isAdmin() || (isSignedIn() && request.auth.token.email == "jcesperanza@neu.edu.ph"); 
+      // Avoid calling isAdmin() here to prevent recursion.
+      // Users can see if they themselves are admins. System admin has full management.
+      allow get: if isSignedIn() && (request.auth.uid == adminId || isSystemAdmin());
+      allow list: if isSystemAdmin();
+      allow create, update, delete: if isSystemAdmin(); 
     }
   }
 }
