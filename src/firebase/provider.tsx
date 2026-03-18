@@ -82,7 +82,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
     const unsubscribeAuth = onAuthStateChanged(
       auth,
       (firebaseUser) => {
-        // Anonymous users are never admins in this system
+        // Check if the user is a hardcoded admin based on email
         const isHardcodedAdmin = firebaseUser && !firebaseUser.isAnonymous && ADMIN_EMAILS.includes(firebaseUser.email || '');
         
         setUserAuthState(prev => ({ 
@@ -91,7 +91,7 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
           isUserLoading: false, 
           userError: null,
           isAdmin: isHardcodedAdmin || false, 
-          // If they aren't hardcoded and not anonymous, we need to check Firestore
+          // If they aren't hardcoded and not anonymous, we need to check Firestore roles_admin collection
           isAdminLoading: firebaseUser && !isHardcodedAdmin && !firebaseUser.isAnonymous ? true : false
         }));
       },
@@ -104,14 +104,15 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
   // Effect to check admin status in Firestore
   useEffect(() => {
+    // Skip if firestore is missing or user isn't eligible for admin check
     if (!firestore || !userAuthState.user || userAuthState.user.isAnonymous) {
-      // Anonymous users or missing users don't need a Firestore check
       if (userAuthState.user?.isAnonymous) {
         setUserAuthState(prev => ({ ...prev, isAdmin: false, isAdminLoading: false }));
       }
       return;
     }
 
+    // Skip if already confirmed via hardcoded email
     const isHardcodedAdmin = ADMIN_EMAILS.includes(userAuthState.user.email || '');
     if (isHardcodedAdmin) {
       setUserAuthState(prev => ({ ...prev, isAdmin: true, isAdminLoading: false }));

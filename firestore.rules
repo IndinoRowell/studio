@@ -9,7 +9,7 @@ service cloud.firestore {
 
     function isAdmin() {
       return isSignedIn() && (
-        request.auth.token.get('email', '') == "jcesperanza@neu.edu.ph" ||
+        (request.auth.token.email != null && request.auth.token.email == "jcesperanza@neu.edu.ph") ||
         exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid))
       );
     }
@@ -28,8 +28,8 @@ service cloud.firestore {
     }
 
     match /visitorLogs/{logId} {
-      // Allow list if the query is restricted to the user's own UID or they are an admin
-      // We use a robust check for resource.data.visitorId to support filtered queries
+      // Allow list if the query is restricted to the user's own UID or they are an admin.
+      // We use a more direct check to ensure compatibility with filtered queries.
       allow list: if isSignedIn() && (
         isAdmin() || 
         (resource.data.visitorId == request.auth.uid)
